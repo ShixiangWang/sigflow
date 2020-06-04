@@ -7,15 +7,15 @@ Author: Shixiang Wang (wangshx@shanghaitech.edu.cn)
 Copyright: MIT@2020
 
 Usage:
-  sigflow.R extract --input=<input> --output=<output>
+  sigflow.R extract --input=<file> --output=<outdir>
   sigflow.R (-h | --help)
   sigflow.R --version
 
 Options:
   -h --help     Show help message.
   --version     Show version.
-  -i <input>, --input <file>  input file path.
-  -o <output>, --output <file>  output directory path.
+  -i <file>, --input <file>  input file path.
+  -o <outdir>, --output <outdir>  output directory path.
 
 =================================================================
 ' -> doc

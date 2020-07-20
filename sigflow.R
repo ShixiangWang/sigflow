@@ -39,6 +39,11 @@ Options:
 library(docopt)
 arguments <- docopt(doc, version = "sigflow v0.1\n")
 
+## Stop error parsing
+if (!exists("arguments")) {
+  quit("no", status = -1)
+}
+
 message("
 =================================================================
 
@@ -62,7 +67,6 @@ Doc    :        https://shixiangwang.github.io/sigminer-doc/
 # Parsing input -----------------------------------------------------------
 
 message("Parsing parameters...\n------")
-# print(arguments)
 ARGS <- arguments[!startsWith(names(arguments), "--")]
 for (i in seq_along(ARGS)) {
   message(names(ARGS)[i], "\t\t: ", ARGS[i])
@@ -102,8 +106,8 @@ output_tally <- function(x, result_dir, mut_type = "SBS") {
     p_samps <- show_catalogue(x, style = "cosmic", mode = "copynumber", samples = samps)
   }
 
-  ggsave(file.path(result_dir, paste0(mut_type, "_tally_total.pdf")),
-    plot = p_samps, width = 12, height = 2 * length(samps)
+  ggsave(file.path(result_dir, paste0(mut_type, "_tally_samps.pdf")),
+    plot = p_samps, width = 12, height = 2 * length(samps), limitsize = FALSE
   )
 }
 
@@ -480,11 +484,15 @@ if (!isCN) {
   if (!file.exists(file.path(result_dir, "maf_obj.RData"))) {
     obj <- sigminer::read_maf(input, verbose = TRUE)
     save(obj, file = file.path(result_dir, "maf_obj.RData"))
+  } else {
+    load(file = file.path(result_dir, "maf_obj.RData"))
   }
 } else {
   if (!file.exists(file.path(result_dir, "cn_obj.RData"))) {
     obj <- sigminer::read_copynumber(input, genome_build = genome_build, verbose = TRUE)
     save(obj, file = file.path(result_dir, "cn_obj.RData"))
+  } else {
+    load(file = file.path(result_dir, "cn_obj.RData"))
   }
 }
 
@@ -520,3 +528,5 @@ TODO: Some End messages to be added...
 #ln -s ~/Documents/GitHub/sigminer.wrapper/sigflow.R ~/.local/bin/sigflow
 # system.file("extdata", "tcga_laml.maf.gz", package = "maftools", mustWork = TRUE)
 # [1] "/Users/wsx/R_library/maftools/extdata/tcga_laml.maf.gz"
+
+# sigflow extract -i /Users/wsx/R_library/maftools/extdata/tcga_laml.maf.gz -o ~/test/test_maf_sigs -m MAF -r 10 -T 4

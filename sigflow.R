@@ -29,8 +29,8 @@ Options:
   -m <class>, --mode <class>      extract mode, can be one of SBS, DBS, ID, MAF (for three types), CN [default: SBS].
   --manual                        enable manual extraction, set -N=0 for outputing signature estimation firstly.
   -N <sigs>, --number <sigs>      extract specified number of signatures [default: 0].
-  -g <genome>, --genome <genome>  human genome build, can be hg19 or hg38, [default: hg19].
-  -r <runs>, --nrun <runs>        times of NMF to get results [default: 30].
+  -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
+  -r <runs>, --nrun <runs>        run times of NMF to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
 
 =================================================================
@@ -72,12 +72,95 @@ message("------\n")
 # Function part -----------------------------------------------------------
 ## Program to go
 
-flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir) {
-  if (!dir.exists(result_dir)) {
-    dir.create(result_dir, recursive = TRUE)
-    sigminer:::send_success("Result directory ", result_dir, " created.")
+output_tally <- function(x, result_dir, mut_type = "SBS") {
+  ## x is a matrix with row representing components (motifs) and column representing samples
+  ## output all samples in bar plots
+
+  if (is.list(x)) {
+    x <- x$nmf_matrix %>% t()
+  }
+
+  samps <- colnames(x)
+
+  if (mut_type != "CN") {
+    p_total <- show_catalogue(x, style = "cosmic", mode = mut_type, x_label_angle = 90, x_label_vjust = 0.5)
   } else {
-    sigminer:::send_info("Result directory ", result_dir, " existed.")
+    p_total <- show_catalogue(x, style = "cosmic", mode = "copynumber")
+  }
+
+  ggsave(file.path(result_dir, paste0(mut_type, "_tally_total.pdf")),
+    plot = p_total, width = 12, height = 3
+  )
+
+  if (mut_type != "CN") {
+    p_samps <- show_catalogue(x,
+      style = "cosmic", mode = mut_type,
+      samples = samps,
+      x_label_angle = 90, x_label_vjust = 0.5
+    )
+  } else {
+    p_samps <- show_catalogue(x, style = "cosmic", mode = "copynumber", samples = samps)
+  }
+
+  ggsave(file.path(result_dir, paste0(mut_type, "_tally_total.pdf")),
+    plot = p_samps, width = 12, height = 2 * length(samps)
+  )
+}
+
+output_sig <- function(sig, result_dir, mut_type = "SBS") {
+  stopifnot(inherits(sig, "Signature"))
+
+  ## Output data
+  if (mut_type != "CN") {
+    data.table::fwrite(sig_signature(sig) %>% data.table::as.data.table(keep.rownames = "component"),
+      file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_signature.csv"))
+    )
+  } else {
+    data.table::fwrite(sig_signature(sig, normalize = "feature") %>% data.table::as.data.table(keep.rownames = "component"),
+      file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_signature.csv"))
+    )
+  }
+  data.table::fwrite(get_sig_exposure(sig),
+    file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_exposure.csv"))
+  )
+  data.table::fwrite(get_groups(sig, method = "k-means"),
+    file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_kmeans_cluster.csv"))
+  )
+
+  ## Output plots
+  if (mut_type != "CN") {
+    p <- show_sig_profile(sig, mode = mut_type, style = "cosmic", x_label_angle = 90, x_label_vjust = 0.5)
+  } else {
+    p <- show_sig_profile(sig, mode = "copynumber", normalize = "feature", style = "cosmic")
+  }
+  ggsave(file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_signature_profile.pdf")),
+    plot = p, width = 12, height = 2 * sig$K
+  )
+
+  if (ncol(sig$Exposure) < 50) {
+    p <- show_sig_exposure(sig, style = "cosmic", hide_samps = FALSE)
+  } else {
+    p <- show_sig_exposure(sig, style = "cosmic", hide_samps = TRUE, rm_space = TRUE)
+  }
+  cowplot::save_plot(file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_exposure_profile.pdf")),
+    plot = p
+  )
+
+  ## Similar analysis and output
+  if (mut_type != "CN") {
+    sim <- get_sig_similarity(sig, sig_db = mut_type)
+    data.table::fwrite(sim$similarity %>% data.table::as.data.table(keep.rownames = "sig"),
+      file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_similarity.csv"))
+    )
+    data.table::fwrite(sim$best_match %>% data.table::as.data.table(),
+      file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_COSMIC_best_match.csv"))
+    )
+  }
+}
+
+flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir) {
+  if (!dir.exists(file.path(result_dir, "results"))) {
+    dir.create(file.path(result_dir, "results"), recursive = TRUE)
   }
 
   timer <- Sys.time()
@@ -88,6 +171,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
     ref_genome <- "BSgenome.Hsapiens.UCSC.hg19"
   } else if (genome_build == "hg38") {
     ref_genome <- "BSgenome.Hsapiens.UCSC.hg19"
+  } else if (genome_build == "mm10") {
+    ref_genome <- "BSgenome.Mmusculus.UCSC.mm10"
   }
 
   if (!require(ref_genome, character.only = TRUE)) {
@@ -99,9 +184,25 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
     if (mode == "MAF") {
       mode <- "ALL"
     }
-    tally_list <- sig_tally(obj, mode = "ALL", ref_genome = ref_genome)
+    if (manual_step <= 0) {
+      tally_list <- sig_tally(obj, mode = "ALL", ref_genome = ref_genome)
+      save(tally_list, file = file.path(result_dir, "maf_tally.RData"))
+      if (!is.null(tally_list$SBS_96)) {
+        output_tally(tally_list$SBS_96 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
+      }
+      if (!is.null(tally_list$DBS_78)) {
+        output_tally(tally_list$DBS_78 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
+      }
+      if (!is.null(tally_list$ID_83)) {
+        output_tally(tally_list$ID_83 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
+      }
+    }
   } else {
-    tally_list <- sig_tally(obj, cores = cores)
+    if (manual_step <= 0) {
+      tally_list <- sig_tally(obj, ignore_chrs = c("chrX", "chrY"), cores = cores)
+      save(tally_list, file = file.path(result_dir, "cn_tally.RData"))
+      output_tally(tally_list, result_dir = file.path(result_dir, "results"), mut_type = "CN")
+    }
   }
 
   if (manual_step < 0) {
@@ -166,27 +267,183 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
     }
   } else {
     ## manual-extract
+    if (manual_step == 0) {
+      ## do signature estimation
+      if (mode == "CN") {
+        est_CN <- sig_estimate(
+          nmf_matrix = tally_list$nmf_matrix,
+          nrun = nrun,
+          range = 2:30,
+          cores = cores,
+          pConstant = 1e-9,
+          save_plots = TRUE,
+          plot_basename = file.path(result_dir, "manual_extraction", "CN_sig_number"),
+          verbose = TRUE
+        )
+
+        data.table::fwrite(est_CN$survey, file = file.path(result_dir, "manual_extraction", "CN_sig_number_survey.csv"))
+        p <- show_sig_number_survey(est_CN$survey)
+        ggsave(file.path(result_dir, "manual_extraction", "CN_sig_number_survey_simple.pdf"),
+          plot = p,
+          width = 6, height = 10
+        )
+      } else {
+        if (mode == "ALL" | mode == "SBS") {
+          mat <- tally_list$SBS_96
+
+          if (!is.null(mat)) {
+            est_SBS <- sig_estimate(
+              nmf_matrix = mat,
+              nrun = nrun,
+              range = 2:30,
+              cores = cores,
+              pConstant = 1e-9,
+              save_plots = TRUE,
+              plot_basename = file.path(result_dir, "manual_extraction", "SBS_sig_number"),
+              verbose = TRUE
+            )
+
+            data.table::fwrite(est_SBS$survey, file = file.path(result_dir, "manual_extraction", "SBS_sig_number_survey.csv"))
+            p <- show_sig_number_survey(est_SBS$survey)
+            ggsave(file.path(result_dir, "manual_extraction", "SBS_sig_number_survey_simple.pdf"),
+              plot = p,
+              width = 6, height = 10
+            )
+          }
+        } else if (mode == "ALL" | mode == "DBS") {
+          mat <- tally_list$DBS_78
+
+          if (!is.null(mat)) {
+            est_DBS <- sig_estimate(
+              nmf_matrix = mat,
+              nrun = nrun,
+              range = 2:30,
+              cores = cores,
+              pConstant = 1e-9,
+              save_plots = TRUE,
+              plot_basename = file.path(result_dir, "manual_extraction", "DBS_sig_number"),
+              verbose = TRUE
+            )
+
+            data.table::fwrite(est_DBS$survey, file = file.path(result_dir, "manual_extraction", "DBS_sig_number_survey.csv"))
+            p <- show_sig_number_survey(est_DBS$survey)
+            ggsave(file.path(result_dir, "manual_extraction", "DBS_sig_number_survey_simple.pdf"),
+              plot = p,
+              width = 6, height = 10
+            )
+          }
+        } else if (mode == "ALL" | mode == "ID") {
+          mat <- tally_list$ID_83
+
+          if (!is.null(mat)) {
+            est_ID <- sig_estimate(
+              nmf_matrix = mat,
+              nrun = nrun,
+              range = 2:30,
+              cores = cores,
+              pConstant = 1e-9,
+              save_plots = TRUE,
+              plot_basename = file.path(result_dir, "manual_extraction", "ID_sig_number"),
+              verbose = TRUE
+            )
+
+            data.table::fwrite(est_ID$survey, file = file.path(result_dir, "manual_extraction", "ID_sig_number_survey.csv"))
+            p <- show_sig_number_survey(est_ID$survey)
+            ggsave(file.path(result_dir, "manual_extraction", "ID_sig_number_survey_simple.pdf"),
+              plot = p,
+              width = 6, height = 10
+            )
+          }
+        }
+      }
+
+      message("==============================")
+      message(
+        "Checking plots in ",
+        file.path(result_dir, "manual_extraction"),
+        " to choose a proper signature number for running the next step."
+      )
+      message("NOTE: if you run all mutation types in this steps, you have to extract them one by one.")
+      message("==============================")
+    } else {
+      ## extract specified signatures
+      if (mode == "CN") {
+        load(file = file.path(result_dir, "cn_tally.RData"))
+
+        sigs_CN <- sig_extract(
+          nmf_matrix = tally_list$nmf_matrix,
+          range = manual_step,
+          nrun = nrun,
+          cores = cores,
+          optimize = TRUE,
+          pConstant = 1e-9
+        )
+      } else {
+        load(file = file.path(result_dir, "maf_tally.RData"))
+
+        if (mode == "ALL" | mode == "SBS") {
+          mat <- tally_list$SBS_96
+
+          if (!is.null(mat)) {
+            sigs_SBS <- sig_extract(
+              nmf_matrix = mat,
+              range = manual_step,
+              nrun = nrun,
+              cores = cores,
+              optimize = TRUE,
+              pConstant = 1e-9
+            )
+          }
+        } else if (mode == "ALL" | mode == "DBS") {
+          mat <- tally_list$DBS_78
+
+          if (!is.null(mat)) {
+            sigs_DBS <- sig_extract(
+              nmf_matrix = mat,
+              range = manual_step,
+              nrun = nrun,
+              cores = cores,
+              optimize = TRUE,
+              pConstant = 1e-9
+            )
+          }
+        } else if (mode == "ALL" | mode == "ID") {
+          mat <- tally_list$ID_83
+
+          if (!is.null(mat)) {
+            sigs_ID <- sig_extract(
+              nmf_matrix = mat,
+              range = manual_step,
+              nrun = nrun,
+              cores = cores,
+              optimize = TRUE,
+              pConstant = 1e-9
+            )
+          }
+        }
+      }
+    }
   }
-  
-  ## Outputing to result directory
+
+  ## Outputing to result sub-directories: CN, SBS, DBS, ID, etc.
   if (exists("sigs_CN")) {
-    
+    output_sig(sigs_CN, result_dir = file.path(result_dir, "results"), mut_type = "CN")
   }
   if (exists("sigs_SBS")) {
-    
+    output_sig(sigs_SBS, result_dir = file.path(result_dir, "results"), mut_type = "SBS")
   }
   if (exists("sigs_DBS")) {
-    
+    output_sig(sigs_DBS, result_dir = file.path(result_dir, "results"), mut_type = "DBS")
   }
   if (exists("sigs_ID")) {
-    
+    output_sig(sigs_ID, result_dir = file.path(result_dir, "results"), mut_type = "ID")
   }
-  
 }
 
 # Action part -------------------------------------------------------------
 ## Check inputs and call the working functions
 suppressPackageStartupMessages(library("sigminer"))
+library(ggplot2)
 
 message("Reading file...\n------")
 
@@ -194,6 +451,7 @@ mode <- ARGS$mode
 input <- ARGS$input
 file_format <- ARGS$format
 genome_build <- ARGS$genome
+result_dir <- path.expand(ARGS$output)
 
 if (any(endsWith(input, c("xls", "xlsx")))) {
   if (!require("readxl")) {
@@ -211,10 +469,23 @@ if (mode == "CN") {
   isCN <- FALSE
 }
 
-if (!isCN) {
-  obj <- sigminer::read_maf(input, verbose = TRUE)
+if (!dir.exists(result_dir)) {
+  dir.create(result_dir, recursive = TRUE)
+  message("Result directory ", result_dir, " created.")
 } else {
-  obj <- sigminer::read_copynumber(input, genome_build = genome_build, verbose = TRUE)
+  message("Result directory ", result_dir, " existed.")
+}
+
+if (!isCN) {
+  if (!file.exists(file.path(result_dir, "maf_obj.RData"))) {
+    obj <- sigminer::read_maf(input, verbose = TRUE)
+    save(obj, file = file.path(result_dir, "maf_obj.RData"))
+  }
+} else {
+  if (!file.exists(file.path(result_dir, "cn_obj.RData"))) {
+    obj <- sigminer::read_copynumber(input, genome_build = genome_build, verbose = TRUE)
+    save(obj, file = file.path(result_dir, "cn_obj.RData"))
+  }
 }
 
 message("------\n")
@@ -231,7 +502,7 @@ if (ARGS$extract) {
   flow_extraction(
     obj = obj, genome_build = genome_build, mode = ARGS$mode,
     manual_step = manual_step, nrun = nrun, cores = cores,
-    result_dir = ARGS$output
+    result_dir = result_dir
   )
 }
 
@@ -245,3 +516,7 @@ TODO: Some End messages to be added...
 
 =================================================================
 ")
+
+#ln -s ~/Documents/GitHub/sigminer.wrapper/sigflow.R ~/.local/bin/sigflow
+# system.file("extdata", "tcga_laml.maf.gz", package = "maftools", mustWork = TRUE)
+# [1] "/Users/wsx/R_library/maftools/extdata/tcga_laml.maf.gz"

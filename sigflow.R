@@ -189,7 +189,7 @@ output_sig <- function(sig, result_dir, mut_type = "SBS") {
     )
     pheatmap::pheatmap(sim$similarity, cluster_cols = TRUE, cluster_rows = FALSE,
                        filename = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_similarity.pdf")),
-                       cellheight = 15)
+                       cellheight = 15, fontsize = 7)
     data.table::fwrite(sim$best_match %>% data.table::as.data.table(),
       file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_COSMIC_best_match.csv"))
     )
@@ -312,6 +312,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
   } else {
     ## manual-extract
     if (manual_step == 0) {
+      suppressPackageStartupMessages(library("NMF"))
       ## do signature estimation
       if (mode == "CN") {
         est_CN <- sig_estimate(
@@ -329,7 +330,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
         p <- show_sig_number_survey(est_CN$survey)
         ggsave(file.path(result_dir, "manual_extraction", "CN_sig_number_survey_simple.pdf"),
           plot = p,
-          width = 6, height = 10
+          width = 10, height = 6
         )
       } else {
         if (mode == "ALL" | mode == "SBS") {
@@ -351,7 +352,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             p <- show_sig_number_survey(est_SBS$survey)
             ggsave(file.path(result_dir, "manual_extraction", "SBS_sig_number_survey_simple.pdf"),
               plot = p,
-              width = 6, height = 10
+              width = 10, height = 6
             )
           }
         } else if (mode == "ALL" | mode == "DBS") {
@@ -373,7 +374,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             p <- show_sig_number_survey(est_DBS$survey)
             ggsave(file.path(result_dir, "manual_extraction", "DBS_sig_number_survey_simple.pdf"),
               plot = p,
-              width = 6, height = 10
+              width = 10, height = 6
             )
           }
         } else if (mode == "ALL" | mode == "ID") {
@@ -395,7 +396,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             p <- show_sig_number_survey(est_ID$survey)
             ggsave(file.path(result_dir, "manual_extraction", "ID_sig_number_survey_simple.pdf"),
               plot = p,
-              width = 6, height = 10
+              width = 10, height = 6
             )
           }
         }
@@ -410,13 +411,14 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
       message("NOTE: if you run all mutation types in this steps, you have to extract them one by one.")
       message("==============================")
     } else {
+      suppressPackageStartupMessages(library("NMF"))
       ## extract specified signatures
       if (mode == "CN") {
         load(file = file.path(result_dir, "cn_tally.RData"))
 
         sigs_CN <- sig_extract(
           nmf_matrix = tally_list$nmf_matrix,
-          range = manual_step,
+          n_sig = manual_step,
           nrun = nrun,
           cores = cores,
           optimize = TRUE,
@@ -431,7 +433,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           if (!is.null(mat)) {
             sigs_SBS <- sig_extract(
               nmf_matrix = mat,
-              range = manual_step,
+              n_sig = manual_step,
               nrun = nrun,
               cores = cores,
               optimize = TRUE,
@@ -444,7 +446,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           if (!is.null(mat)) {
             sigs_DBS <- sig_extract(
               nmf_matrix = mat,
-              range = manual_step,
+              n_sig = manual_step,
               nrun = nrun,
               cores = cores,
               optimize = TRUE,
@@ -457,7 +459,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           if (!is.null(mat)) {
             sigs_ID <- sig_extract(
               nmf_matrix = mat,
-              range = manual_step,
+              n_sig = manual_step,
               nrun = nrun,
               cores = cores,
               optimize = TRUE,
@@ -559,10 +561,17 @@ if (ARGS$extract) {
   }
   nrun <- as.integer(ARGS$nrun)
   cores <- min(as.integer(ARGS$cores), parallel::detectCores())
-  flow_extraction(
-    obj = obj, genome_build = genome_build, mode = ARGS$mode,
-    manual_step = manual_step, nrun = nrun, cores = cores,
-    result_dir = result_dir
+  tryCatch(
+    flow_extraction(
+      obj = obj, genome_build = genome_build, mode = ARGS$mode,
+      manual_step = manual_step, nrun = nrun, cores = cores,
+      result_dir = result_dir
+    ),
+    error = function(e) {
+      message("An error is detected in extract process. Quit the program!")
+      message(e$message)
+      quit("no", -1)
+    }
   )
 }
 

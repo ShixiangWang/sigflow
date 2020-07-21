@@ -35,7 +35,7 @@ else
     t4="succeed in test #4"
 fi
 
-$5
+#5
 sigflow extract -i example_cn.tsv -o test_results/test_cn -m CN -r 10 -T 4
 if [ $? -ne 0 ]; then
     t5="failed at 'test_cn' in mode 'CN'"
@@ -43,6 +43,20 @@ else
     t5="succeed in test #5"
 fi
 
+#6
+sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf_manual -m SBS -r 10 -T 4 --manual -g hg38
+if [ $? -ne 0 ]; then
+    t6_1="failed at 'test_manual' step 1 in mode 'SBS'"
+else
+    t6_1="succeed in test #6 step 1"
+fi
+
+sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf_manual -m SBS -r 10 -T 4 --manual -N 3
+if [ $? -ne 0 ]; then
+    t6_2="failed at 'test_manual' step 2 in mode 'SBS'"
+else
+    t6_2="succeed in test #6 step 2"
+fi
 
 ## Output test results
 echo ===========================================
@@ -52,3 +66,5 @@ echo $t2
 echo $t3
 echo $t4
 echo $t5
+echo "$t6_1; $t6_2"
+echo ===========================================

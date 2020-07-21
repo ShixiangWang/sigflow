@@ -17,14 +17,14 @@ Desc:
   fit     - fit signatures in >=1 samples.
 
 Usage:
-  sigflow.R extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>][--format=<format>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>]
+  sigflow.R extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>]
   sigflow.R (-h | --help)
   sigflow.R --version
 
 Options:
   -h --help     Show help message.
   --version     Show version.
-  -i <file>, --input <file>       input file path.
+  -i <file>, --input <file>       input file/directory path.
   -o <outdir>, --output <outdir>  output directory path [default: ./sigflow_result/].
   -m <class>, --mode <class>      extract mode, can be one of SBS, DBS, ID, MAF (for three types), CN [default: SBS].
   --manual                        enable manual extraction, set -N=0 for outputing signature estimation firstly.
@@ -103,16 +103,26 @@ output_tally <- function(x, result_dir, mut_type = "SBS") {
       x_label_angle = 90, x_label_vjust = 0.5
     )
   } else {
-    p_samps <- show_catalogue(x, style = "cosmic", mode = "copynumber", samples = samps)
+    p_samps <- show_catalogue(x, 
+                              style = "cosmic", mode = "copynumber", 
+                              normalize = "feature",
+                              samples = samps)
   }
 
   ggsave(file.path(result_dir, paste0(mut_type, "_tally_samps.pdf")),
     plot = p_samps, width = 12, height = 2 * length(samps), limitsize = FALSE
   )
+  
+  return(invisible(NULL))
 }
 
 output_sig <- function(sig, result_dir, mut_type = "SBS") {
   stopifnot(inherits(sig, "Signature"))
+  message("Outputing signature results.\n==")
+  
+  message("Outputing signature object, signature and exposure matrix.")
+  ## Output Signature object
+  saveRDS(sig, file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_signatureObj.rds")))
 
   ## Output data
   if (mut_type != "CN") {
@@ -127,11 +137,30 @@ output_sig <- function(sig, result_dir, mut_type = "SBS") {
   data.table::fwrite(get_sig_exposure(sig),
     file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_exposure.csv"))
   )
-  data.table::fwrite(get_groups(sig, method = "k-means"),
-    file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_kmeans_cluster.csv"))
-  )
+  
+  message("Outputing sample clusters based on signature contribution.")
+  if (sig$K > 1) {
+    message("=> Running k-means clustering.")
+    grp <- tryCatch(
+      get_groups(sig, method = "k-means"),
+      error = function(e) {
+        message("==> Error detected when running k-means, switch to directly assign samples based on exposure")
+        get_groups(sig, method = "exposure")
+      }
+    )
+    data.table::fwrite(grp,
+                       file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_kmeans_cluster.csv"))
+    )
+    pdf(file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_kmeans_cluster.pdf")), 
+        width = 1.5 * length(unique(grp$group)), height = 4)
+    show_groups(grp)
+    dev.off()
+  } else {
+    message("Skip clustering only one signatures.")
+  }
 
   ## Output plots
+  message("Outputing signature profile plot.")
   if (mut_type != "CN") {
     p <- show_sig_profile(sig, mode = mut_type, style = "cosmic", x_label_angle = 90, x_label_vjust = 0.5)
   } else {
@@ -141,6 +170,7 @@ output_sig <- function(sig, result_dir, mut_type = "SBS") {
     plot = p, width = 12, height = 2 * sig$K
   )
 
+  message("Outputing signature exposure plot.")
   if (ncol(sig$Exposure) < 50) {
     p <- show_sig_exposure(sig, style = "cosmic", hide_samps = FALSE)
   } else {
@@ -152,14 +182,20 @@ output_sig <- function(sig, result_dir, mut_type = "SBS") {
 
   ## Similar analysis and output
   if (mut_type != "CN") {
+    message("Outputing signature similarity analysis results.")
     sim <- get_sig_similarity(sig, sig_db = mut_type)
     data.table::fwrite(sim$similarity %>% data.table::as.data.table(keep.rownames = "sig"),
       file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_similarity.csv"))
     )
+    pheatmap::pheatmap(sim$similarity, cluster_cols = TRUE, cluster_rows = FALSE,
+                       filename = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_similarity.pdf")),
+                       cellheight = 15)
     data.table::fwrite(sim$best_match %>% data.table::as.data.table(),
       file = file.path(result_dir, paste0(mut_type, "_", attr(sig, "call_method"), "_COSMIC_best_match.csv"))
     )
   }
+  
+  return(invisible(NULL))
 }
 
 flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir) {
@@ -216,7 +252,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
         nmf_matrix = tally_list$nmf_matrix,
         result_prefix = "BayesianNMF_CN",
         destdir = file.path(result_dir, "BayesianNMF"),
-        K0 = ncol(tally_list$nmf_matrix) - 1L,
+        strategy = "stable",
+        K0 = 30L,
         nrun = nrun,
         cores = cores,
         skip = TRUE
@@ -229,7 +266,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             nmf_matrix = mat,
             result_prefix = "BayesianNMF_SBS",
             destdir = file.path(result_dir, "BayesianNMF"),
-            K0 = ncol(mat) - 1L,
+            strategy = "stable",
+            K0 = 30L,
             nrun = nrun,
             cores = cores,
             skip = TRUE
@@ -244,7 +282,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             nmf_matrix = mat,
             result_prefix = "BayesianNMF_DBS",
             destdir = file.path(result_dir, "BayesianNMF"),
-            K0 = ncol(mat) - 1L,
+            strategy = "stable",
+            K0 = 30L,
             nrun = nrun,
             cores = cores,
             skip = TRUE
@@ -259,7 +298,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             nmf_matrix = mat,
             result_prefix = "BayesianNMF_ID",
             destdir = file.path(result_dir, "BayesianNMF"),
-            K0 = ncol(mat) - 1L,
+            strategy = "stable",
+            K0 = 30L,
             nrun = nrun,
             cores = cores,
             skip = TRUE
@@ -442,18 +482,20 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
   if (exists("sigs_ID")) {
     output_sig(sigs_ID, result_dir = file.path(result_dir, "results"), mut_type = "ID")
   }
+  
+  return(invisible(NULL))
 }
 
 # Action part -------------------------------------------------------------
 ## Check inputs and call the working functions
 suppressPackageStartupMessages(library("sigminer"))
-library(ggplot2)
+suppressPackageStartupMessages(library("ggplot2"))
+suppressPackageStartupMessages(library("pheatmap"))
 
 message("Reading file...\n------")
 
 mode <- ARGS$mode
 input <- ARGS$input
-file_format <- ARGS$format
 genome_build <- ARGS$genome
 result_dir <- path.expand(ARGS$output)
 
@@ -482,7 +524,17 @@ if (!dir.exists(result_dir)) {
 
 if (!isCN) {
   if (!file.exists(file.path(result_dir, "maf_obj.RData"))) {
-    obj <- sigminer::read_maf(input, verbose = TRUE)
+    if (dir.exists(input)) {
+      fs <- list.files(input, pattern = "*.vcf", full.names = TRUE)
+      if (length(fs) < 1) {
+        message("When input is a directory, it should contain VCF files!")
+        quit("no", status = -1)
+      }
+      message("Try parsing VCF files...")
+      obj <- sigminer::read_vcf(fs, genome_build = genome_build, keep_only_pass = FALSE, verbose = TRUE)
+    } else {
+      obj <- sigminer::read_maf(input, verbose = TRUE)
+    }
     save(obj, file = file.path(result_dir, "maf_obj.RData"))
   } else {
     load(file = file.path(result_dir, "maf_obj.RData"))
@@ -519,14 +571,4 @@ if (ARGS$extract) {
 
 message("
 ============================== END
-
-TODO: Some End messages to be added...
-
-=================================================================
 ")
-
-#ln -s ~/Documents/GitHub/sigminer.wrapper/sigflow.R ~/.local/bin/sigflow
-# system.file("extdata", "tcga_laml.maf.gz", package = "maftools", mustWork = TRUE)
-# [1] "/Users/wsx/R_library/maftools/extdata/tcga_laml.maf.gz"
-
-# sigflow extract -i /Users/wsx/R_library/maftools/extdata/tcga_laml.maf.gz -o ~/test/test_maf_sigs -m MAF -r 10 -T 4

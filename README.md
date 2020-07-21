@@ -32,3 +32,7 @@ git clone https://github.com/ShixiangWang/sigminer.workflow
 ```bash
 $ Rscript sigflow.R -h
 ```
+
+## Copyright
+
+Copyright 2020 © Shixiang Wang. All rights reserved. Without the permission of the owner, do not copy or modify, especially for commercial use.

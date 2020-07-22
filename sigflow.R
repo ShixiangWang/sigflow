@@ -15,22 +15,26 @@ Desc:
             and secondly you should set --manual --number N to get N signatures.
   ==
   fit     - fit signatures in >=1 samples.
+  ==
+  bt      - run bootstrap signature fitting analysis in >=1 samples.
 
 Usage:
-  sigflow.R extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>]
-  sigflow.R (-h | --help)
-  sigflow.R --version
+  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>]
+  sigflow fit --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>]
+  sigflow bt --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>]
+  sigflow (-h | --help)
+  sigflow --version
 
 Options:
   -h --help     Show help message.
   --version     Show version.
   -i <file>, --input <file>       input file/directory path.
   -o <outdir>, --output <outdir>  output directory path [default: ./sigflow_result/].
-  -m <class>, --mode <class>      extract mode, can be one of SBS, DBS, ID, MAF (for three types), CN [default: SBS].
+  -m <class>, --mode <class>      extract/fit mode, can be one of SBS, DBS, ID, MAF (for three types), CN (not supported in fit subcommand) [default: SBS].
   --manual                        enable manual extraction, set -N=0 for outputing signature estimation firstly.
   -N <sigs>, --number <sigs>      extract specified number of signatures [default: 0].
   -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
-  -r <runs>, --nrun <runs>        run times of NMF to get results [default: 30].
+  -r <runs>, --nrun <runs>        run times of NMF (extract) or bootstrapping (bt) to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
 
 =================================================================
@@ -79,6 +83,7 @@ message("------\n")
 output_tally <- function(x, result_dir, mut_type = "SBS") {
   ## x is a matrix with row representing components (motifs) and column representing samples
   ## output all samples in bar plots
+  message("Outputing tally results for ", mut_type)
 
   if (is.list(x)) {
     x <- x$nmf_matrix %>% t()
@@ -117,8 +122,9 @@ output_tally <- function(x, result_dir, mut_type = "SBS") {
 }
 
 output_sig <- function(sig, result_dir, mut_type = "SBS") {
+  message("Outputing signature results for ", mut_type, "\n==")
+  
   stopifnot(inherits(sig, "Signature"))
-  message("Outputing signature results.\n==")
   
   message("Outputing signature object, signature and exposure matrix.")
   ## Output Signature object
@@ -198,13 +204,132 @@ output_sig <- function(sig, result_dir, mut_type = "SBS") {
   return(invisible(NULL))
 }
 
+output_fit <- function(x, result_dir, mut_type = "SBS") {
+  message("Outputing signature fitting results for ", mut_type)
+  
+  expo <- x$expo
+  error <- x$errors %>% data.table::as.data.table(keep.rownames = TRUE)
+  colnames(error) <- c("sample", "error")
+  
+  rel_expo <- expo %>% 
+    dplyr::mutate(s = rowSums(.[, -1])) %>%
+    dplyr::mutate_at(dplyr::vars(-c("sample", "s")), ~./.data$s) %>%
+    dplyr::select(-"s") %>%
+    data.table::as.data.table()
+  
+  data.table::fwrite(expo, file = file.path(result_dir, paste0(mut_type, "_fitting_absolute_exposure.csv")))
+  data.table::fwrite(rel_expo, file = file.path(result_dir, paste0(mut_type, "_fitting_relative_exposure.csv")))
+  data.table::fwrite(error, file = file.path(result_dir, paste0(mut_type, "_fitting_reconstruction_errors.csv")))
+  
+  if (mut_type != "SBS") {
+    p1 <- show_sig_fit(expo, palette = NULL, add = NULL, plot_fun = "boxplot") + ggpubr::rotate_x_text()
+    p2 <- show_sig_fit(expo, palette = NULL, add = NULL, plot_fun = "violin") + ggpubr::rotate_x_text()
+    
+    p3 <- show_sig_fit(rel_expo, palette = NULL, add = NULL, plot_fun = "boxplot") + ggpubr::rotate_x_text()
+    p4 <- show_sig_fit(rel_expo, palette = NULL, add = NULL, plot_fun = "violin") + ggpubr::rotate_x_text()
+  } else {
+    z <- get_sig_db("SBS")
+    sigs <- rownames(z$aetiology)[!grepl("artefact", z$aetiology$aetiology)]
+    message("Removed 'Possible sequencing artefact' signatures in plots.")
+    
+    p1 <- show_sig_fit(expo, palette = NULL, add = NULL, plot_fun = "boxplot", signatures = sigs) + ggpubr::rotate_x_text()
+    p2 <- show_sig_fit(expo, palette = NULL, add = NULL, plot_fun = "violin", signatures = sigs) + ggpubr::rotate_x_text()
+    
+    p3 <- show_sig_fit(rel_expo, palette = NULL, add = NULL, plot_fun = "boxplot", signatures = sigs) + ggpubr::rotate_x_text()
+    p4 <- show_sig_fit(rel_expo, palette = NULL, add = NULL, plot_fun = "violin", signatures = sigs) + ggpubr::rotate_x_text()
+  }
+  
+  if (mut_type == "legacy") {
+    ## 30 signatures
+    width <- 10
+    height <- 4
+  } else if (mut_type == "SBS") {
+    ## 49 signatures
+    width <- 15
+    height <- 4
+  } else if (mut_type == "DBS") {
+    ## 11 signatures
+    width <- 5
+    height <- 4
+  } else if (mut_type == "ID") {
+    ## 17 signatures
+    width <- 7
+    height <- 4
+  }
+  
+  ggsave(file.path(result_dir, paste0(mut_type, "_fitting_absolute_exposure_boxplot.pdf")),
+         plot = p1, width = width, height = height)
+  ggsave(file.path(result_dir, paste0(mut_type, "_fitting_absolute_exposure_violin.pdf")),
+         plot = p2, width = width, height = height)
+  ggsave(file.path(result_dir, paste0(mut_type, "_fitting_relative_exposure_boxplot.pdf")),
+         plot = p3, width = width, height = height)
+  ggsave(file.path(result_dir, paste0(mut_type, "_fitting_relative_exposure_violin.pdf")),
+         plot = p4, width = width, height = height)
+}
+
+output_bootstrap <- function(x, result_dir, mut_type = "SBS") {
+  message("Outputing signature bootstrap fitting results for ", mut_type)
+  
+  data.table::fwrite(x$expo, file = file.path(result_dir, paste0(mut_type, "_bootstrap_absolute_exposure.csv")))
+  data.table::fwrite(x$error, file = file.path(result_dir, paste0(mut_type, "_bootstrap_reconstruction_errors.csv")))
+  data.table::fwrite(x$p_val, file = file.path(result_dir, paste0(mut_type, "_bootstrap_p_values_under_different_exposure_cutoffs.csv")))
+  
+  if (mut_type != "SBS") {
+    p1 <- show_sig_bootstrap_stability(x) + theme(legend.position = "none")
+    p2 <- show_sig_bootstrap_exposure(x) + theme(legend.position = "none")
+    
+  } else {
+    z <- get_sig_db("SBS")
+    sigs <- rownames(z$aetiology)[!grepl("artefact", z$aetiology$aetiology)]
+    message("Removed 'Possible sequencing artefact' signatures in plots.")
+    
+    p1 <- show_sig_bootstrap_stability(x, signatures = sigs) + theme(legend.position = "none")
+    p2 <- show_sig_bootstrap_exposure(x, signatures = sigs) + theme(legend.position = "none")
+  }
+  
+  if (mut_type == "legacy") {
+    ## 30 signatures
+    width <- 10
+    height <- 4
+  } else if (mut_type == "SBS") {
+    ## 49 signatures
+    width <- 15
+    height <- 4
+  } else if (mut_type == "DBS") {
+    ## 11 signatures
+    width <- 5
+    height <- 4
+  } else if (mut_type == "ID") {
+    ## 17 signatures
+    width <- 7
+    height <- 4
+  }
+  
+  ggsave(file.path(result_dir, paste0(mut_type, "_bootstrap_signature_instability_boxplot.pdf")),
+         plot = p1, width = width, height = height)
+  ggsave(file.path(result_dir, paste0(mut_type, "_bootstrap_absolute_exposure_boxplot.pdf")),
+         plot = p2, width = width, height = height)
+  
+  samps <- unique(x$expo$sample)
+  pdf(file = file.path(result_dir, paste0(mut_type, "_bootstrap_absolute_exposure_per_sample_boxplot.pdf")),
+      width = width, height = height * length(samps))
+  for (i in samps) {
+    if (mut_type == "SBS") {
+      show_sig_bootstrap_exposure(x, signatures = sigs, sample = i) + theme(legend.position = "none")
+    } else {
+      show_sig_bootstrap_exposure(x, sample = i) + theme(legend.position = "none")
+    }
+  }
+  dev.off()
+}
+
 flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir) {
   if (!dir.exists(file.path(result_dir, "results"))) {
     dir.create(file.path(result_dir, "results"), recursive = TRUE)
   }
 
   timer <- Sys.time()
-  sigminer:::send_info("Started.")
+  sigminer:::send_info("Pipeline for extraction started.")
   on.exit(sigminer:::send_elapsed_time(timer))
 
   if (genome_build == "hg19") {
@@ -227,13 +352,13 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
     if (manual_step <= 0) {
       tally_list <- sig_tally(obj, mode = "ALL", ref_genome = ref_genome)
       save(tally_list, file = file.path(result_dir, "maf_tally.RData"))
-      if (!is.null(tally_list$SBS_96)) {
+      if (!is.null(tally_list$SBS_96) & mode %in% c("SBS", "ALL")) {
         output_tally(tally_list$SBS_96 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
       }
-      if (!is.null(tally_list$DBS_78)) {
+      if (!is.null(tally_list$DBS_78) & mode %in% c("DBS", "ALL")) {
         output_tally(tally_list$DBS_78 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
       }
-      if (!is.null(tally_list$ID_83)) {
+      if (!is.null(tally_list$ID_83) & mode %in% c("ID", "ALL")) {
         output_tally(tally_list$ID_83 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
       }
     }
@@ -275,7 +400,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
         } else {
           sigminer:::send_info("SBS_96 matrix is NULL, skip extracting.")
         }
-      } else if (mode == "ALL" | mode == "DBS") {
+      }
+      if (mode == "ALL" | mode == "DBS") {
         mat <- tally_list$DBS_78
         if (!is.null(mat)) {
           sigs_DBS <- sig_auto_extract(
@@ -291,7 +417,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
         } else {
           sigminer:::send_info("DBS_78 matrix is NULL, skip extracting.")
         }
-      } else if (mode == "ALL" | mode == "ID") {
+      }
+      if (mode == "ALL" | mode == "ID") {
         mat <- tally_list$ID_83
         if (!is.null(mat)) {
           sigs_ID <- sig_auto_extract(
@@ -355,7 +482,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               width = 10, height = 6
             )
           }
-        } else if (mode == "ALL" | mode == "DBS") {
+        }
+        if (mode == "ALL" | mode == "DBS") {
           mat <- tally_list$DBS_78
 
           if (!is.null(mat)) {
@@ -377,7 +505,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               width = 10, height = 6
             )
           }
-        } else if (mode == "ALL" | mode == "ID") {
+        }
+        if (mode == "ALL" | mode == "ID") {
           mat <- tally_list$ID_83
 
           if (!is.null(mat)) {
@@ -426,8 +555,14 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
         )
       } else {
         load(file = file.path(result_dir, "maf_tally.RData"))
+        
+        if (mode == "ALL") {
+          sigminer:::send_warning("In the step 2 of manual extraction, you can only extract one type of signature (SBS/DBS/ID).")
+          sigminer:::send_warning("Set mode to 'SBS'.")
+          mode <- "SBS"
+        }
 
-        if (mode == "ALL" | mode == "SBS") {
+        if (mode == "SBS") {
           mat <- tally_list$SBS_96
 
           if (!is.null(mat)) {
@@ -440,7 +575,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               pConstant = 1e-9
             )
           }
-        } else if (mode == "ALL" | mode == "DBS") {
+        } 
+        if (mode == "DBS") {
           mat <- tally_list$DBS_78
 
           if (!is.null(mat)) {
@@ -453,7 +589,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               pConstant = 1e-9
             )
           }
-        } else if (mode == "ALL" | mode == "ID") {
+        }
+        if (mode == "ID") {
           mat <- tally_list$ID_83
 
           if (!is.null(mat)) {
@@ -486,6 +623,189 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
   }
   
   return(invisible(NULL))
+}
+
+
+
+flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog = c("fit", "bootstrap")) {
+  
+  prog <- match.arg(prog)
+  
+  if (!dir.exists(file.path(result_dir, "results"))) {
+    dir.create(file.path(result_dir, "results"), recursive = TRUE)
+  }
+  
+  timer <- Sys.time()
+  sigminer:::send_info("Pipeline for (bootstrap) fitting started.")
+  on.exit(sigminer:::send_elapsed_time(timer))
+  
+  if (genome_build == "hg19") {
+    ref_genome <- "BSgenome.Hsapiens.UCSC.hg19"
+  } else if (genome_build == "hg38") {
+    ref_genome <- "BSgenome.Hsapiens.UCSC.hg19"
+  } else if (genome_build == "mm10") {
+    ref_genome <- "BSgenome.Mmusculus.UCSC.mm10"
+  }
+  
+  if (!require(ref_genome, character.only = TRUE)) {
+    sigminer:::send_info("Package ", ref_genome, " not found, try installing.")
+    BiocManager::install(ref_genome)
+  }
+  
+  if (mode != "CN") {
+    if (mode == "MAF") {
+      mode <- "ALL"
+    }
+    tally_list <- sig_tally(obj, mode = "ALL", ref_genome = ref_genome)
+    save(tally_list, file = file.path(result_dir, "maf_tally.RData"))
+    if (!is.null(tally_list$SBS_96) & mode %in% c("SBS", "ALL")) {
+      output_tally(tally_list$SBS_96 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
+    }
+    if (!is.null(tally_list$DBS_78) & mode %in% c("DBS", "ALL")) {
+      output_tally(tally_list$DBS_78 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
+    }
+    if (!is.null(tally_list$ID_83) & mode %in% c("ID", "ALL")) {
+      output_tally(tally_list$ID_83 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
+    }
+  } else {
+    stop("Fitting reference signatures is not supported for now!")
+    # tally_list <- sig_tally(obj, ignore_chrs = c("chrX", "chrY"), cores = parallel::detectCores())
+    # save(tally_list, file = file.path(result_dir, "cn_tally.RData"))
+    # output_tally(tally_list, result_dir = file.path(result_dir, "results"), mut_type = "CN")
+  }
+  
+  if (prog == "fit") {
+    if (mode == "ALL" | mode == "SBS") {
+      mat <- tally_list$SBS_96 %>% t()
+      
+      if (!is.null(mat)) {
+        ## COSMIC V2 SBS
+        fit_legacy <- sig_fit(
+          catalogue_matrix = mat,
+          sig_index = "ALL",
+          sig_db = "legacy",
+          mode = "SBS",
+          return_class = "data.table",
+          return_error = TRUE
+        )
+        output_fit(fit_legacy, result_dir = file.path(result_dir, "results"), mut_type = "legacy")
+        
+        fit_SBS <- sig_fit(
+          catalogue_matrix = mat,
+          sig_index = "ALL",
+          sig_db = "SBS",
+          mode = "SBS",
+          return_class = "data.table",
+          return_error = TRUE
+        )
+        output_fit(fit_SBS, result_dir = file.path(result_dir, "results"), mut_type = "SBS")
+      }
+    } 
+    if (mode == "ALL" | mode == "DBS") {
+      mat <- tally_list$DBS_78 %>% t()
+      
+      if (!is.null(mat)) {
+        fit_DBS <- sig_fit(
+          catalogue_matrix = mat,
+          sig_index = "ALL",
+          sig_db = "DBS",
+          mode = "DBS",
+          return_class = "data.table",
+          return_error = TRUE
+        )
+        output_fit(fit_DBS, result_dir = file.path(result_dir, "results"), mut_type = "DBS")
+      }
+    }
+    if (mode == "ALL" | mode == "ID") {
+      mat <- tally_list$ID_83 %>% t()
+      
+      if (!is.null(mat)) {
+        fit_ID <- sig_fit(
+          catalogue_matrix = mat,
+          sig_index = "ALL",
+          sig_db = "ID",
+          mode = "ID",
+          return_class = "data.table",
+          return_error = TRUE
+        )
+        output_fit(fit_ID, result_dir = file.path(result_dir, "results"), mut_type = "ID")
+      }
+    }
+  } else {
+    ## bootstrap fitting
+    if (mode == "ALL" | mode == "SBS") {
+      mat <- tally_list$SBS_96 %>% t()
+      
+      if (!is.null(mat)) {
+        ## COSMIC V2 SBS
+        bt_legacy <- sig_fit_bootstrap_batch(
+          catalogue_matrix = mat,
+          sig_index = "ALL",
+          sig_db = "legacy",
+          mode = "SBS",
+          n = nrun,
+          p_val_thresholds = c(0.01, 0.05, 0.10, 0.25),
+          use_parallel = TRUE,
+          job_id = "legacy",
+          result_dir = file.path(result_dir, "bootstrap"),
+        )
+        
+        output_bootstrap(bt_legacy, result_dir = file.path(result_dir, "results"), mut_type = "legacy")
+        
+        bt_SBS <- sig_fit_bootstrap_batch(
+          catalogue_matrix = mat,
+          sig_index = "ALL",
+          sig_db = "SBS",
+          mode = "SBS",
+          n = nrun,
+          p_val_thresholds = c(0.01, 0.05, 0.10, 0.25),
+          use_parallel = TRUE,
+          job_id = "SBS",
+          result_dir = file.path(result_dir, "bootstrap"),
+        )
+        
+        output_bootstrap(bt_SBS, result_dir = file.path(result_dir, "results"), mut_type = "SBS")
+      }
+    }
+    if (mode == "ALL" | mode == "DBS") {
+      mat <- tally_list$DBS_78 %>% t()
+      
+      if (!is.null(mat)) {
+        bt_DBS <- sig_fit_bootstrap_batch(
+          catalogue_matrix = mat,
+          sig_index = "ALL",
+          sig_db = "DBS",
+          mode = "DBS",
+          n = nrun,
+          p_val_thresholds = c(0.01, 0.05, 0.10, 0.25),
+          use_parallel = TRUE,
+          job_id = "DBS",
+          result_dir = file.path(result_dir, "bootstrap"),
+        )
+        
+        output_bootstrap(bt_DBS, result_dir = file.path(result_dir, "results"), mut_type = "DBS")
+      }
+    }
+    if (mode == "ALL" | mode == "ID") {
+      mat <- tally_list$ID_83 %>% t()
+      
+      if (!is.null(mat)) {
+        bt_ID <- sig_fit_bootstrap_batch(
+          catalogue_matrix = mat,
+          sig_index = "ALL",
+          sig_db = "ID",
+          mode = "ID",
+          n = nrun,
+          p_val_thresholds = c(0.01, 0.05, 0.10, 0.25),
+          use_parallel = TRUE,
+          job_id = "ID",
+          result_dir = file.path(result_dir, "bootstrap"),
+        )
+        
+        output_bootstrap(bt_ID, result_dir = file.path(result_dir, "results"), mut_type = "ID")
+      }
+    }
+  }
 }
 
 # Action part -------------------------------------------------------------
@@ -573,8 +893,34 @@ if (ARGS$extract) {
       quit("no", -1)
     }
   )
+} else if (ARGS$fit) {
+  message("Running signature fitting pipeline...\n------")
+  tryCatch(
+    flow_fitting(
+      obj = obj, genome_build = genome_build, mode = ARGS$mode,
+      result_dir = result_dir, prog = "fit"),
+    error = function(e) {
+      message("An error is detected in fitting process. Quit the program!")
+      message(e$message)
+      quit("no", -1)
+    }
+  )
+} else if (ARGS$bt) {
+  message("Running signature bootstrap fitting pipeline...\n------")
+  nrun <- as.integer(ARGS$nrun)
+  tryCatch(
+    flow_fitting(
+      obj = obj, genome_build = genome_build, mode = ARGS$mode,
+      result_dir = result_dir, nrun = nrun, prog = "bootstrap"),
+    error = function(e) {
+      message("An error is detected in bootstrap fitting process. Quit the program!")
+      message(e$message)
+      quit("no", -1)
+    }
+  )
 }
 
+# flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog = c("fit", "bootstrap")) {
 
 # End part ----------------------------------------------------------------
 

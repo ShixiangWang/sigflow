@@ -60,10 +60,10 @@ message("
 
 Name   :       sigflow
 Author :       Shixiang Wang
-Version:        0.1
-License:        MIT
-Link   :        https://github.com/ShixiangWang/sigminer.workflow
-Doc    :        https://shixiangwang.github.io/sigminer-doc/
+Version:       0.1
+License:       AFL 3.0
+Link   :       https://github.com/ShixiangWang/sigminer.workflow
+Doc    :       https://shixiangwang.github.io/sigminer-doc/
 ============================== START
 ")
 
@@ -676,9 +676,10 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
   
   if (prog == "fit") {
     if (mode == "ALL" | mode == "SBS") {
-      mat <- tally_list$SBS_96 %>% t()
+      mat <- tally_list$SBS_96
       
       if (!is.null(mat)) {
+        mat <- t(mat)
         ## COSMIC V2 SBS
         fit_legacy <- sig_fit(
           catalogue_matrix = mat,
@@ -702,9 +703,10 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
       }
     } 
     if (mode == "ALL" | mode == "DBS") {
-      mat <- tally_list$DBS_78 %>% t()
+      mat <- tally_list$DBS_78
       
       if (!is.null(mat)) {
+        mat <- t(mat)
         fit_DBS <- sig_fit(
           catalogue_matrix = mat,
           sig_index = "ALL",
@@ -717,9 +719,10 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
       }
     }
     if (mode == "ALL" | mode == "ID") {
-      mat <- tally_list$ID_83 %>% t()
+      mat <- tally_list$ID_83
       
       if (!is.null(mat)) {
+        mat <- t(mat)
         fit_ID <- sig_fit(
           catalogue_matrix = mat,
           sig_index = "ALL",
@@ -734,9 +737,10 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
   } else {
     ## bootstrap fitting
     if (mode == "ALL" | mode == "SBS") {
-      mat <- tally_list$SBS_96 %>% t()
+      mat <- tally_list$SBS_96
       
       if (!is.null(mat)) {
+        mat <- t(mat)
         ## COSMIC V2 SBS
         bt_legacy <- sig_fit_bootstrap_batch(
           catalogue_matrix = mat,
@@ -768,9 +772,10 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
       }
     }
     if (mode == "ALL" | mode == "DBS") {
-      mat <- tally_list$DBS_78 %>% t()
+      mat <- tally_list$DBS_78
       
       if (!is.null(mat)) {
+        mat <- t(mat)
         bt_DBS <- sig_fit_bootstrap_batch(
           catalogue_matrix = mat,
           sig_index = "ALL",
@@ -790,6 +795,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
       mat <- tally_list$ID_83 %>% t()
       
       if (!is.null(mat)) {
+        mat <- t(mat)
         bt_ID <- sig_fit_bootstrap_batch(
           catalogue_matrix = mat,
           sig_index = "ALL",
@@ -919,8 +925,6 @@ if (ARGS$extract) {
     }
   )
 }
-
-# flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog = c("fit", "bootstrap")) {
 
 # End part ----------------------------------------------------------------
 

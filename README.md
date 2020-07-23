@@ -9,7 +9,9 @@
      \/  /_____/  
 ```
 
-**sigflow** provides mutational signature analysis workflows based on R package [sigminer](https://github.com/ShixiangWang/sigminer).
+**sigflow** provides useful mutational signature analysis workflows based on R package [sigminer](https://github.com/ShixiangWang/sigminer). It can auto-extract mutational signatures,
+fit mutation data to COSMIC reference signatures (SBS/DBS/INDEL) and run bootstrapping analysis for
+signature fitting.
 
 
 ## Installation
@@ -37,13 +39,24 @@ BiocManager::install("sigminer", dependencies = TRUE)
 git clone https://github.com/ShixiangWang/sigminer.workflow
 ```
 
+4. Link the R script as a executable file (command)
+
+```bash
+cd sigminer.workflow
+ln -s $PWD/sigflow.R /usr/bin/sigflow  # You can choose another place instead of /usr/bin/sigflow
+```
+
+5. Try calling `sigflow` by `sigflow -h`.
+
+> Maybe you need to restart your terminal.
+
 ## Usage
 
 ```
 sigflow: Streamline Analysis Workflow for Mutational Signatures.
 
 Author: Shixiang Wang (wangshx@shanghaitech.edu.cn)
-Copyright: MIT@2020
+Copyright: AFL@2020 [https://opensource.org/licenses/AFL-3.0]
 
 Desc:
   There are several subcommands.
@@ -54,25 +67,42 @@ Desc:
             and secondly you should set --manual --number N to get N signatures.
   ==
   fit     - fit signatures in >=1 samples.
+  ==
+  bt      - run bootstrap signature fitting analysis in >=1 samples.
 
 Usage:
-  sigflow.R extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>]
-  sigflow.R (-h | --help)
-  sigflow.R --version
+  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>]
+  sigflow fit --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>]
+  sigflow bt --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>]
+  sigflow (-h | --help)
+  sigflow --version
 
 Options:
   -h --help     Show help message.
   --version     Show version.
   -i <file>, --input <file>       input file/directory path.
   -o <outdir>, --output <outdir>  output directory path [default: ./sigflow_result/].
-  -m <class>, --mode <class>      extract mode, can be one of SBS, DBS, ID, MAF (for three types), CN [default: SBS].
+  -m <class>, --mode <class>      extract/fit mode, can be one of SBS, DBS, ID, MAF (for three types), CN (not supported in fit subcommand) [default: SBS].
   --manual                        enable manual extraction, set -N=0 for outputing signature estimation firstly.
   -N <sigs>, --number <sigs>      extract specified number of signatures [default: 0].
   -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
-  -r <runs>, --nrun <runs>        run times of NMF to get results [default: 30].
+  -r <runs>, --nrun <runs>        run times of NMF (extract) or bootstrapping (bt) to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
 
 ```
+
+## Test
+
+There are some example data in this repository, you can find how to test different workflows in [test/test.sh](test/test.sh).
+It is time consuming to run all tests, just pick an example test similar to your task and see how it works. Before releasing a new version of `sigflow`, I would run all tests to make sure they work well.
+
+## Citation
+
+**sigflow: Streamline Analysis Workflow for Mutational Signatures**, *under preparation*.
+
+If you are using **sigflow** fow now, please cite:
+
+**Wang, Shixiang, et al. “Copy number signature analyses in prostate cancer reveal distinct etiologies and clinical outcomes” medRxiv (2020)** https://www.medrxiv.org/content/early/2020/04/29/2020.04.27.20082404
 
 ## License
 

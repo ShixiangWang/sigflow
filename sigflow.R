@@ -222,21 +222,21 @@ output_fit <- function(x, result_dir, mut_type = "SBS") {
   data.table::fwrite(error, file = file.path(result_dir, paste0(mut_type, "_fitting_reconstruction_errors.csv")))
   
   if (mut_type != "SBS") {
-    p1 <- show_sig_fit(expo, palette = NULL, add = NULL, plot_fun = "boxplot") + ggpubr::rotate_x_text()
-    p2 <- show_sig_fit(expo, palette = NULL, add = NULL, plot_fun = "violin") + ggpubr::rotate_x_text()
+    p1 <- show_sig_fit(expo, palette = NULL, plot_fun = "boxplot") + ggpubr::rotate_x_text()
+    p2 <- show_sig_fit(expo, palette = NULL, plot_fun = "violin") + ggpubr::rotate_x_text()
     
-    p3 <- show_sig_fit(rel_expo, palette = NULL, add = NULL, plot_fun = "boxplot") + ggpubr::rotate_x_text()
-    p4 <- show_sig_fit(rel_expo, palette = NULL, add = NULL, plot_fun = "violin") + ggpubr::rotate_x_text()
+    p3 <- show_sig_fit(rel_expo, palette = NULL, plot_fun = "boxplot") + ggpubr::rotate_x_text()
+    p4 <- show_sig_fit(rel_expo, palette = NULL, plot_fun = "violin") + ggpubr::rotate_x_text()
   } else {
     z <- get_sig_db("SBS")
     sigs <- rownames(z$aetiology)[!grepl("artefact", z$aetiology$aetiology)]
     message("Removed 'Possible sequencing artefact' signatures in plots.")
     
-    p1 <- show_sig_fit(expo, palette = NULL, add = NULL, plot_fun = "boxplot", signatures = sigs) + ggpubr::rotate_x_text()
-    p2 <- show_sig_fit(expo, palette = NULL, add = NULL, plot_fun = "violin", signatures = sigs) + ggpubr::rotate_x_text()
+    p1 <- show_sig_fit(expo, palette = NULL, plot_fun = "boxplot", signatures = sigs) + ggpubr::rotate_x_text()
+    p2 <- show_sig_fit(expo, palette = NULL, plot_fun = "violin", signatures = sigs) + ggpubr::rotate_x_text()
     
-    p3 <- show_sig_fit(rel_expo, palette = NULL, add = NULL, plot_fun = "boxplot", signatures = sigs) + ggpubr::rotate_x_text()
-    p4 <- show_sig_fit(rel_expo, palette = NULL, add = NULL, plot_fun = "violin", signatures = sigs) + ggpubr::rotate_x_text()
+    p3 <- show_sig_fit(rel_expo, palette = NULL, plot_fun = "boxplot", signatures = sigs) + ggpubr::rotate_x_text()
+    p4 <- show_sig_fit(rel_expo, palette = NULL, plot_fun = "violin", signatures = sigs) + ggpubr::rotate_x_text()
   }
   
   if (mut_type == "legacy") {
@@ -275,16 +275,16 @@ output_bootstrap <- function(x, result_dir, mut_type = "SBS") {
   data.table::fwrite(x$p_val, file = file.path(result_dir, paste0(mut_type, "_bootstrap_p_values_under_different_exposure_cutoffs.csv")))
   
   if (mut_type != "SBS") {
-    p1 <- show_sig_bootstrap_stability(x) + theme(legend.position = "none")
-    p2 <- show_sig_bootstrap_exposure(x) + theme(legend.position = "none")
+    p1 <- show_sig_bootstrap_stability(x) + theme(legend.position = "none") + ggpubr::rotate_x_text()
+    p2 <- show_sig_bootstrap_exposure(x) + theme(legend.position = "none") + ggpubr::rotate_x_text()
     
   } else {
     z <- get_sig_db("SBS")
     sigs <- rownames(z$aetiology)[!grepl("artefact", z$aetiology$aetiology)]
     message("Removed 'Possible sequencing artefact' signatures in plots.")
     
-    p1 <- show_sig_bootstrap_stability(x, signatures = sigs) + theme(legend.position = "none")
-    p2 <- show_sig_bootstrap_exposure(x, signatures = sigs) + theme(legend.position = "none")
+    p1 <- show_sig_bootstrap_stability(x, signatures = sigs) + theme(legend.position = "none") + ggpubr::rotate_x_text()
+    p2 <- show_sig_bootstrap_exposure(x, signatures = sigs) + theme(legend.position = "none") + ggpubr::rotate_x_text()
   }
   
   if (mut_type == "legacy") {
@@ -311,16 +311,20 @@ output_bootstrap <- function(x, result_dir, mut_type = "SBS") {
          plot = p2, width = width, height = height)
   
   samps <- unique(x$expo$sample)
-  pdf(file = file.path(result_dir, paste0(mut_type, "_bootstrap_absolute_exposure_per_sample_boxplot.pdf")),
-      width = width, height = height * length(samps))
-  for (i in samps) {
-    if (mut_type == "SBS") {
-      show_sig_bootstrap_exposure(x, signatures = sigs, sample = i) + theme(legend.position = "none")
-    } else {
-      show_sig_bootstrap_exposure(x, sample = i) + theme(legend.position = "none")
-    }
+  samp_dir <- file.path(result_dir, paste0(mut_type, "_bootstrap_absolute_exposure_per_sample_boxplot"))
+  if (!dir.exists(samp_dir)) {
+    dir.create(samp_dir, recursive = TRUE)
   }
-  dev.off()
+  for (i in samps) {
+    message("Plotting sample: ", i)
+    if (mut_type == "SBS") {
+      p <- show_sig_bootstrap_exposure(x, signatures = sigs, sample = i) + theme(legend.position = "none") + ggpubr::rotate_x_text()
+    } else {
+      p <- show_sig_bootstrap_exposure(x, sample = i) + theme(legend.position = "none") + ggpubr::rotate_x_text()
+    }
+    ggsave(file.path(samp_dir, paste0(i, ".pdf")),
+           plot = p, width = width, height = height)
+  }
 }
 
 flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir) {
@@ -668,7 +672,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
       output_tally(tally_list$ID_83 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
     }
   } else {
-    stop("Fitting reference signatures is not supported for now!")
+    stop("Fitting reference signatures for CN is not supported for now!")
     # tally_list <- sig_tally(obj, ignore_chrs = c("chrX", "chrY"), cores = parallel::detectCores())
     # save(tally_list, file = file.path(result_dir, "cn_tally.RData"))
     # output_tally(tally_list, result_dir = file.path(result_dir, "results"), mut_type = "CN")
@@ -792,7 +796,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
       }
     }
     if (mode == "ALL" | mode == "ID") {
-      mat <- tally_list$ID_83 %>% t()
+      mat <- tally_list$ID_83
       
       if (!is.null(mat)) {
         mat <- t(mat)

@@ -63,17 +63,17 @@ fi
 #7
 sigflow fit -i tcga_laml.maf.gz -o test_results/test_fitting -m MAF
 if [ $? -ne 0 ]; then
-    t1="failed at 'test_fitting' in mode 'MAF'"
+    t7="failed at 'test_fitting' in mode 'MAF'"
 else
-    t1="succeed in test #7"
+    t7="succeed in test #7"
 fi
 
 #8
 sigflow bt -i tcga_laml.maf.gz -o test_results/test_bt -m MAF -r 10
 if [ $? -ne 0 ]; then
-    t1="failed at 'test_bt' in mode 'MAF'"
+    t8="failed at 'test_bt' in mode 'MAF'"
 else
-    t1="succeed in test #8"
+    t8="succeed in test #8"
 fi
 
 ## Output test results

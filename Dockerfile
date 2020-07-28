@@ -14,7 +14,7 @@ RUN R -e "install.packages('docopt', repos = 'https://cloud.r-project.org')" && 
     R -e "install.packages('BiocManager', repos = 'https://cloud.r-project.org')" && \
     R -e "BiocManager::install(c('data.table', 'dplyr', 'purrr', 'tidyr', 'furrr', 'Rcpp', 'cowplot', 'NMF', 'ggpubr', 'cli', 'reticulate', 'roxygen2'))"
 ## Install R packages which are not easy to install
-RUN R -e "BiocManager::install('BSgenome', dependencies = TRUE)" && \
+RUN R -e "BiocManager::install('BSgenome')" && \
     R -e "BiocManager::install('sigminer', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/*
     ## Support all genomes directly

@@ -19,9 +19,11 @@ RUN R -e "BiocManager::install('BSgenome', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/*
     ## Support all genomes directly
     #R -e "BiocManager::install(c('BSgenome.Hsapiens.UCSC.hg38', 'BSgenome.Hsapiens.UCSC.mm10'))"
-COPY sigflow.R test/ /opt/
+COPY sigflow.R /opt/
 RUN chmod u+x /opt/sigflow.R && ln -s /opt/sigflow.R /usr/bin/sigflow
 # Run test
-#RUN cd /opt/test && chmod u+x test.sh && ./test.sh && rm -rf test_results && cd /root
+COPY ./test/ /opt/
+RUN ls -l /opt && cd /opt/test && chmod u+x test.sh && ./test.sh && rm -rf test_results && cd /root
 WORKDIR /root
-CMD [ "sigflow" ]
+ENTRYPOINT [ "sigflow" ]
+CMD [ "--help" ]

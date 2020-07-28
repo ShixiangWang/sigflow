@@ -22,6 +22,6 @@ RUN R -e "BiocManager::install('BSgenome', dependencies = TRUE)" && \
 COPY sigflow.R test/ /opt/
 RUN chmod u+x /opt/sigflow.R && ln -s /opt/sigflow.R /usr/bin/sigflow
 # Run test
-RUN cd /opt/test && chmod u+x test.sh && ./test.sh && rm -rf test_results && cd /root
+#RUN cd /opt/test && chmod u+x test.sh && ./test.sh && rm -rf test_results && cd /root
 WORKDIR /root
 CMD [ "sigflow" ]

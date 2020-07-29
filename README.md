@@ -80,6 +80,8 @@ Run the docker by:
 docker run shixiangwang/sigflow
 ```
 
+See [test/test_docker.sh](test/test_docker.sh) for examples.
+
 ## Updates
 
 - 2020-07-29: release the first version of sigflow (0.1) using Docker.

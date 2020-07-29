@@ -1,3 +1,5 @@
 docker build -t sigflow .
-# docker tag bb389 shixiangwang/sigminer.workflow:tagname
-# docker push shixiangwang/sigminer.workflow:tagname
+# Push steps:
+# docker login --username shixiangwang
+# docker tag bb389 shixiangwang/sigflow:tagname
+# docker push shixiangwang/sigflow:tagname

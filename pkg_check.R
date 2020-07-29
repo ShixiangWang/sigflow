@@ -1,5 +1,5 @@
 ## Modify based on code from https://stackoverflow.com/questions/46902203/verify-r-packages-installed-into-docker-container
-c("remotes", "sigminer", "BSgenome.Hsapiens.UCSC.hg38", "BSgenome.Hsapiens.UCSC.mm10") -> chk_pkgs
+c("remotes", "sigminer", "BSgenome.Hsapiens.UCSC.hg38", "BSgenome.Mmusculus.UCSC.mm10") -> chk_pkgs
 
 ret <- suppressPackageStartupMessages(
   sapply(chk_pkgs, require, character.only=TRUE, quietly=FALSE, warn.conflicts=FALSE)

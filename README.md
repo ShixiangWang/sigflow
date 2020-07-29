@@ -9,10 +9,13 @@
      \/  /_____/  
 ```
 
+[![](https://images.microbadger.com/badges/image/shixiangwang/sigflow.svg)](https://microbadger.com/images/shixiangwang/sigflow "Get your own image badge on microbadger.com")
+
 **sigflow** provides useful mutational signature analysis workflows based on R package [sigminer](https://github.com/ShixiangWang/sigminer). It can auto-extract mutational signatures,
 fit mutation data to COSMIC reference signatures (SBS/DBS/INDEL) and run bootstrapping analysis for
 signature fitting.
 
+Skip the following installation step if you would like to use [Docker](https://hub.docker.com/r/shixiangwang/sigflow).
 
 ## Installation
 
@@ -49,6 +52,31 @@ ln -s $PWD/sigflow.R /usr/bin/sigflow  # You can choose another place instead of
 5. Try calling `sigflow` by `sigflow -h`.
 
 > Maybe you need to restart your terminal.
+
+## Use SigFlow docker image
+
+Use specified version (recommended way):
+
+```
+docker pull shixiangwang/sigflow:0.1
+```
+
+Current available tag versions:
+
+- 0.1
+
+Use latest version:
+
+```
+docker pull shixiangwang/sigflow:latest
+```
+
+> The latest version uses the latest commit from GitHub, so it may have not been
+> prepared or tested. **So, be careful!**
+
+## Updates
+
+- 2020-07-29: release the first version of sigflow (0.1) using Docker.
 
 ## Usage
 

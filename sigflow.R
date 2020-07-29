@@ -40,7 +40,11 @@ Options:
 =================================================================
 " -> doc
 
-library(docopt)
+if (!require("docopt")) {
+  install.packages('docopt', repos = 'https://cloud.r-project.org')
+}
+
+library("docopt")
 arguments <- docopt(doc, version = "sigflow v0.1\n")
 
 ## Stop error parsing

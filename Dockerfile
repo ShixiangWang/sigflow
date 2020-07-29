@@ -8,7 +8,7 @@ LABEL \
     version="SigFlow v0.1 based on Sigminer v1.0.9 (platform R v4.0.2)" \
     org.label-schema.license="Academic Free License v. 3.0" \
     org.label-schema.vcs-url="https://github.com/ShixiangWang/sigminer.workflow/" \
-    org.label-schema.vendor="XSLiu Lab Project" \
+    org.label-schema.vendor="XSLiu Lab Project"
 
 ## Install system dependencies
 RUN apt update -y && apt install -y libcurl4-openssl-dev libxml2-dev libssl-dev &&  \
@@ -36,3 +36,5 @@ WORKDIR /root
 ## see: https://phoenixnap.com/kb/docker-run-override-entrypoint
 ENTRYPOINT [ "sigflow" ]
 CMD [ "--help" ]
+## Can entrypoint directly input outside files?
+## CMD ["sigflow", "--help"]

@@ -74,6 +74,12 @@ docker pull shixiangwang/sigflow:latest
 > The latest version uses the latest commit from GitHub, so it may have not been
 > prepared or tested. **So, be careful!**
 
+Run the docker by:
+
+```
+docker run shixiangwang/sigflow
+```
+
 ## Updates
 
 - 2020-07-29: release the first version of sigflow (0.1) using Docker.

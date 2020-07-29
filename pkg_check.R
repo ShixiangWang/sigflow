@@ -8,8 +8,8 @@ ret <- suppressPackageStartupMessages(
 missing_pkgs <- names(ret[!ret])
 
 if (length(missing_pkgs) > 0) {
-  warning("The following packages are not installed: %s", 
-          paste0(sprintf("  - %s", missing_pkgs), collapse="\n"))
+  warning("The following packages are not installed: ", 
+          paste0(sprintf("  - %s", missing_pkgs), collapse="\n"), immediate. = TRUE)
   message("Try installing them...")
 
   if ("sigminer" %in% missing_pkgs) {
@@ -29,8 +29,8 @@ if (length(missing_pkgs) > 0) {
   missing_pkgs <- names(ret[!ret])
 
   if (length(missing_pkgs) > 0) {
-      warning("Still cannot fix installing problem, quit with -1.")
+      warning("Still cannot fix installing problem, quit with -1.", immediate. = TRUE)
   }
 }
 
-quit(save = FALSE, status = ifelse(length(missing_pkgs) == 0, 0, -1), runLast = FALSE)
+quit(save = 'no', status = ifelse(length(missing_pkgs) == 0, 0, -1), runLast = FALSE)

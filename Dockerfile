@@ -11,10 +11,10 @@ RUN apt update -y && apt install -y libcurl4-openssl-dev libxml2-dev libssl-dev 
     apt autoremove -y && apt clean -y && apt purge -y && rm -rf /tmp/* /var/tmp/*
 ## Install R packages which are easy to install
 RUN R -e "install.packages('BiocManager', repos = 'https://cloud.r-project.org')" && \
-    R -e "BiocManager::install(c('data.table', 'dplyr', 'purrr', 'tidyr', 'furrr', 'Rcpp', 'cowplot', 'NMF', 'ggpubr', 'cli', 'reticulate', 'roxygen2'))"
+    R -e "BiocManager::install(c('remotes', 'data.table', 'dplyr', 'purrr', 'tidyr', 'furrr', 'Rcpp', 'cowplot', 'NMF', 'ggpubr', 'cli', 'reticulate', 'roxygen2'))"
 ## Install R packages which are not easy to install
 RUN R -e "BiocManager::install('BSgenome')" && \
-    R -e "BiocManager::install('ShixiangWang/sigminer', dependencies = TRUE)" && \
+    R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.9', dependencies = TRUE)" && \
     R -e "BiocManager::install(c('BSgenome.Hsapiens.UCSC.hg38', 'BSgenome.Hsapiens.UCSC.mm10'))" && \
     rm -rf /tmp/* /var/tmp/*
 ## Copy sigflow program and run test

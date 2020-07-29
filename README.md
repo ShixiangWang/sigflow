@@ -53,8 +53,6 @@ ln -s $PWD/sigflow.R /usr/bin/sigflow  # You can choose another place instead of
 
 ## Use SigFlow docker image
 
-[![](https://images.microbadger.com/badges/image/shixiangwang/sigflow.svg)](https://microbadger.com/images/shixiangwang/sigflow "Get your own image badge on microbadger.com")
-
 Use specified version (recommended way):
 
 ```
@@ -63,9 +61,11 @@ docker pull shixiangwang/sigflow:0.1
 
 Current available tag versions:
 
-- 0.1
+- [![](https://images.microbadger.com/badges/version/shixiangwang/sigflow:0.1.svg)](https://microbadger.com/images/shixiangwang/sigflow:0.1 "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/shixiangwang/sigflow:0.1.svg)](https://microbadger.com/images/shixiangwang/sigflow:0.1 "Get your own image badge on microbadger.com")
 
 Use latest version:
+
+[![](https://images.microbadger.com/badges/image/shixiangwang/sigflow.svg)](https://microbadger.com/images/shixiangwang/sigflow "Get your own image badge on microbadger.com")
 
 ```
 docker pull shixiangwang/sigflow:latest

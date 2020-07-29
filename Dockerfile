@@ -4,7 +4,7 @@ LABEL \
     author="Shixiang Wang" \
     email="w_shixiang@163.com" \
     description="Docker Image for Sigflow" \
-    version="SigFlow v0.1.0 built on R v4.0.2"
+    version="SigFlow v0.1 based on Sigminer v1.0.9 (platform R v4.0.2)"
 
 ## Install system dependencies
 RUN apt update -y && apt install -y libcurl4-openssl-dev libxml2-dev libssl-dev &&  \

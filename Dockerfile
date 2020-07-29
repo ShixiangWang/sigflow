@@ -16,10 +16,13 @@ RUN apt update -y && apt install -y libcurl4-openssl-dev libxml2-dev libssl-dev 
 ## Install R packages which are easy to install
 RUN R -e "install.packages('BiocManager', repos = 'https://cloud.r-project.org')" && \
     R -e "BiocManager::install(c('remotes', 'data.table', 'dplyr', 'purrr', 'tidyr', 'furrr', 'Rcpp', 'cowplot', 'NMF', 'ggpubr', 'cli', 'reticulate', 'roxygen2'))"
-## Install R packages which are not easy to install
-RUN R -e "BiocManager::install('BSgenome')" && \
-    R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.9', dependencies = TRUE)" && \
-    R -e "BiocManager::install(c('BSgenome.Hsapiens.UCSC.hg38', 'BSgenome.Mmusculus.UCSC.mm10'))" && \
+## Install reference genome packages which are big
+RUN R -e "BiocManager::install('BSgenome')"
+RUN R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')"
+RUN R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')"
+RUN R -e "BiocManager::install('BSgenome.Mmusculus.UCSC.mm10')"
+## Install sigminer
+RUN R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.9', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/*
 ## Copy sigflow program and run test
 ## It is strange that the docopt cannot be installed to the first location

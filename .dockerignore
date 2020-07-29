@@ -1,0 +1,4 @@
+.gitignore
+README.md
+sigminer.workflow.Rproj
+docker_build.sh

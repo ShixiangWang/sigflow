@@ -19,9 +19,10 @@ RUN R -e "BiocManager::install('BSgenome')" && \
     rm -rf /tmp/* /var/tmp/*
 ## Copy sigflow program and run test
 ## It is strange that the docopt cannot be installed to the first location
-COPY sigflow.R /opt/
+COPY sigflow.R pkg_check.R /opt/
 COPY ./test/ /opt/test/
 RUN R -e "install.packages('docopt', lib = .libPaths()[2])" && \
+    R /opt/pkg_check.R && \
     chmod u+x /opt/sigflow.R && ln -s /opt/sigflow.R /usr/bin/sigflow && \
     cd /opt/test && chmod u+x test.sh && ./test.sh && rm -rf test_results && cd /root
 WORKDIR /root

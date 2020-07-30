@@ -37,17 +37,21 @@ BiocManager::install("sigminer", dependencies = TRUE)
 3. Clone this repository, run
 
 ```bash
-git clone https://github.com/ShixiangWang/sigminer.workflow
+$ git clone https://github.com/ShixiangWang/sigminer.workflow
 ```
 
 4. Link the R script as a executable file (command)
 
 ```bash
-cd sigminer.workflow
-ln -s $PWD/sigflow.R /usr/bin/sigflow  # You can choose another place instead of /usr/bin/sigflow
+$ cd sigminer.workflow
+$ ln -s $PWD/sigflow.R /usr/bin/sigflow  # You can choose another place instead of /usr/bin/sigflow
 ```
 
-5. Try calling `sigflow` by `sigflow -h`.
+5. Try calling `sigflow`
+
+```bash
+sigflow -h
+```
 
 > Maybe you need to restart your terminal.
 
@@ -55,8 +59,9 @@ ln -s $PWD/sigflow.R /usr/bin/sigflow  # You can choose another place instead of
 
 Use specified version (recommended way):
 
-```
-docker pull shixiangwang/sigflow:0.1
+```bash
+# docker pull shixiangwang/sigflow:version, e.g.
+$ docker pull shixiangwang/sigflow:0.1
 ```
 
 Current available tag versions:
@@ -67,8 +72,8 @@ Use latest version:
 
 [![](https://images.microbadger.com/badges/image/shixiangwang/sigflow.svg)](https://microbadger.com/images/shixiangwang/sigflow "Get your own image badge on microbadger.com")
 
-```
-docker pull shixiangwang/sigflow:latest
+```bash
+$ docker pull shixiangwang/sigflow:latest
 ```
 
 > The latest version uses the latest commit from GitHub, so it may have not been
@@ -76,11 +81,17 @@ docker pull shixiangwang/sigflow:latest
 
 Run the docker by:
 
-```
-docker run shixiangwang/sigflow
+```bash
+$ docker run shixiangwang/sigflow
 ```
 
 See [test/test_docker.sh](test/test_docker.sh) for examples.
+
+If you want to go into the docker terminal, run
+
+```bash
+$ docker run --rm --entrypoint /bin/bash -it shixiangwang/sigflow
+```
 
 ## Updates
 

@@ -1,5 +1,7 @@
 # sigflow: Streamline Analysis Workflow for Mutational Signatures
 
+<img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/shixiangwang/sigminer.workflow"> <img alt="Docker Automated build" src="https://img.shields.io/docker/automated/shixiangwang/sigflow"> <img alt="Docker Image Version (latest by date)" src="https://img.shields.io/docker/v/shixiangwang/sigflow?color=blue"> <img alt="Docker Image Size (latest by date)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow"> <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/shixiangwang/sigflow">
+
 ```
        .__        _____.__                 
   _____|__| _____/ ____\  |   ______  _  __
@@ -66,11 +68,10 @@ $ docker pull shixiangwang/sigflow:0.1
 
 Current available tag versions:
 
-- [![](https://images.microbadger.com/badges/version/shixiangwang/sigflow:0.1.svg)](https://microbadger.com/images/shixiangwang/sigflow:0.1 "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/shixiangwang/sigflow:0.1.svg)](https://microbadger.com/images/shixiangwang/sigflow:0.1 "Get your own image badge on microbadger.com")
+- <img alt="Docker Image Version (tag latest semver)" src="https://img.shields.io/docker/v/shixiangwang/sigflow/0.1?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/0.1"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/0.1">
 
 Use latest version:
 
-[![](https://images.microbadger.com/badges/image/shixiangwang/sigflow.svg)](https://microbadger.com/images/shixiangwang/sigflow "Get your own image badge on microbadger.com")
 
 ```bash
 $ docker pull shixiangwang/sigflow:latest

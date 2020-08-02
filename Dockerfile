@@ -24,7 +24,7 @@ RUN R -e "BiocManager::install('BSgenome.Mmusculus.UCSC.mm10')"
 RUN R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.9', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/*
 ## Install Sigprofiler
-RUN R -e "sigminer::sigprofiler_extract(NULL, '/opt/test_sp_install', use_conda = TRUE)" && \
+RUN R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_M.RData', package = 'sigminer', mustWork = TRUE)); sigprofiler_extract(cn_tally_M$nmf_matrix, '/opt/test_sp_install', use_conda = TRUE)" && \
     rm -rf /opt/test_sp_install
 ## Copy sigflow program and run test
 ## It is strange that the docopt cannot be installed to the first location
@@ -39,6 +39,7 @@ WORKDIR /root
 ## When ENTRYPOINT is used, the docker can be only run as a command 
 ## unless specify --entrypoint /bin/bash to access docker terminal
 ## see: https://phoenixnap.com/kb/docker-run-override-entrypoint
+## sudo docker run -it --entrypoint bash shixiangwang/sigflow
 ENTRYPOINT [ "sigflow" ]
 CMD [ "--help" ]
 ## Can entrypoint directly input outside files?

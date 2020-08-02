@@ -5,7 +5,6 @@ LABEL \
     maintainer="Shixiang Wang" \
     email="w_shixiang@163.com" \
     description="Docker Image for Sigflow" \
-    version="SigFlow v0.1 based on Sigminer v1.0.9 (platform R v4.0.2)" \
     org.label-schema.license="Academic Free License v. 3.0" \
     org.label-schema.vcs-url="https://github.com/ShixiangWang/sigminer.workflow/" \
     org.label-schema.vendor="XSLiu Lab Project"
@@ -24,6 +23,9 @@ RUN R -e "BiocManager::install('BSgenome.Mmusculus.UCSC.mm10')"
 ## Install sigminer
 RUN R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.9', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/*
+## Install Sigprofiler
+RUN R -e "sigminer::sigprofiler_extract(NULL, '/opt/test_sp_install', use_conda = TRUE)" && \
+    rm -rf /opt/test_sp_install
 ## Copy sigflow program and run test
 ## It is strange that the docopt cannot be installed to the first location
 COPY sigflow.R pkg_check.R /opt/

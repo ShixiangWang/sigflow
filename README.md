@@ -1,4 +1,4 @@
-# sigflow: Streamline Analysis Workflow for Mutational Signatures
+# Sigflow: Streamline Analysis Workflow for Mutational Signatures
 
 <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/shixiangwang/sigminer.workflow"> <img alt="Docker Automated build" src="https://img.shields.io/docker/automated/shixiangwang/sigflow"> <img alt="Docker Image Version (latest by date)" src="https://img.shields.io/docker/v/shixiangwang/sigflow?color=blue"> <img alt="Docker Image Size (latest by date)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow"> <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/shixiangwang/sigflow">
 
@@ -11,7 +11,7 @@
      \/  /_____/  
 ```
 
-**sigflow** provides useful mutational signature analysis workflows based on R package [sigminer](https://github.com/ShixiangWang/sigminer). It can auto-extract mutational signatures,
+**Sigflow** provides useful mutational signature analysis workflows based on R package [sigminer](https://github.com/ShixiangWang/sigminer). It can auto-extract mutational signatures,
 fit mutation data to COSMIC reference signatures (SBS/DBS/INDEL) and run bootstrapping analysis for
 signature fitting.
 
@@ -23,7 +23,7 @@ Requirements:
 
 - R (>3.6).
 - R package [sigminer](https://github.com/ShixiangWang/sigminer).
-- R package [docopt]().
+- R package [docopt](https://cran.r-project.org/package=docopt).
 
 Steps:
 
@@ -57,7 +57,7 @@ sigflow -h
 
 > Maybe you need to restart your terminal.
 
-## Use SigFlow docker image
+## Use Sigflow docker image
 
 Use specified version (recommended way):
 
@@ -70,8 +70,11 @@ Current available tag versions:
 
 - <img alt="Docker Image Version (tag latest semver)" src="https://img.shields.io/docker/v/shixiangwang/sigflow/0.1?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/0.1"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/0.1">
 
-Use latest version:
+Version platforms:
 
+- Sigflow 0.1 is based on Sigminer v1.0.9 in R v4.0.2
+
+Use latest version:
 
 ```bash
 $ docker pull shixiangwang/sigflow:latest

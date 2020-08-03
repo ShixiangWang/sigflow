@@ -16,18 +16,19 @@ RUN apt update -y && apt install -y libcurl4-openssl-dev libxml2-dev libssl-dev 
 RUN R -e "install.packages('BiocManager', repos = 'https://cloud.r-project.org')" && \
     R -e "BiocManager::install(c('remotes', 'data.table', 'dplyr', 'purrr', 'tidyr', 'furrr', 'Rcpp', 'cowplot', 'NMF', 'ggpubr', 'cli', 'reticulate', 'roxygen2'))"
 ## Install reference genome packages which are big
-RUN R -e "BiocManager::install('BSgenome')"
-RUN R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')"
-RUN R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')"
-RUN R -e "BiocManager::install('BSgenome.Mmusculus.UCSC.mm10')"
-## Install sigminer
+RUN R -e "BiocManager::install('BSgenome')" && \
+    R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')" && \
+    R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')" && \
+    R -e "BiocManager::install('BSgenome.Mmusculus.UCSC.mm10')"
+## Install sigminer & Sigprofiler
 RUN R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.9', dependencies = TRUE)" && \
-    rm -rf /tmp/* /var/tmp/*
-## Install Sigprofiler
-RUN R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_M.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_M[['nmf_matrix']]; print(mat); sigprofiler_extract(mat, '/opt/test_sp_install', use_conda = TRUE)" && \
-    rm -rf /opt/test_sp_install
+    rm -rf /tmp/* /var/tmp/* && \
+    R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_M.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_M[['nmf_matrix']]; print(mat); sigprofiler_extract(mat, '/opt/test_sp_install', use_conda = TRUE)" && \
+    rm -rf /opt/test_sp_install && \
+    /root/.local/share/r-miniconda/bin/conda clean -afy
 ## Copy sigflow program and run test
 ## It is strange that the docopt cannot be installed to the first location
+ENV PATH /root/.local/share/r-miniconda/bin:$PTH
 COPY sigflow.R pkg_check.R /opt/
 COPY ./test/ /opt/test/
 RUN R --vanilla -f /opt/pkg_check.R && \

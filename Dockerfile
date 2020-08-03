@@ -28,7 +28,7 @@ RUN R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.9', dependencies = TR
     /root/.local/share/r-miniconda/bin/conda clean -afy
 ## Copy sigflow program and run test
 ## It is strange that the docopt cannot be installed to the first location
-ENV PATH /root/.local/share/r-miniconda/bin:$PTH
+ENV PATH /root/.local/share/r-miniconda/bin:$PATH
 COPY sigflow.R pkg_check.R /opt/
 COPY ./test/ /opt/test/
 RUN R --vanilla -f /opt/pkg_check.R && \

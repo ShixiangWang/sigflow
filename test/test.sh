@@ -76,6 +76,14 @@ else
     t8="succeed in test #8"
 fi
 
+## SigProfiler PART
+sigflow extract -i tcga_laml.maf.gz -o test_results/test_sigprofiler -m MAF -r 10 -T 4 --sigprofiler
+if [ $? -ne 0 ]; then
+    t9="failed at 'test_sigprofiler' in mode 'MAF'"
+else
+    t9="succeed in test #9"
+fi
+
 ## Output test results
 echo ===========================================
 echo "             Test Results               "
@@ -87,4 +95,5 @@ echo $t5
 echo "$t6_1; $t6_2"
 echo $t7
 echo $t8
+echo $t9
 echo ===========================================

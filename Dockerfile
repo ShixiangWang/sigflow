@@ -21,7 +21,7 @@ RUN R -e "BiocManager::install('BSgenome')" && \
     R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')" && \
     R -e "BiocManager::install('BSgenome.Mmusculus.UCSC.mm10')"
 ## Install sigminer & Sigprofiler
-RUN R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.9', dependencies = TRUE)" && \
+RUN R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.10', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/* && \
     R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_M.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_M[['nmf_matrix']]; print(mat); sigprofiler_extract(mat, '/opt/test_sp_install', range = 3:4, nrun = 2L, use_conda = TRUE)" && \
     rm -rf /opt/test_sp_install && \

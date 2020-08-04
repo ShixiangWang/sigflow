@@ -69,9 +69,9 @@ else
 fi
 
 #8
-sigflow bt -i tcga_laml.maf.gz -o test_results/test_bt -m MAF -r 10
+sigflow bt -i tcga_laml.maf.gz -o test_results/test_bt -m SBS -r 5
 if [ $? -ne 0 ]; then
-    t8="failed at 'test_bt' in mode 'MAF'"
+    t8="failed at 'test_bt' in mode 'SBS'"
 else
     t8="succeed in test #8"
 fi

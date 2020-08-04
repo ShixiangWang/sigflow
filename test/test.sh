@@ -77,9 +77,9 @@ else
 fi
 
 ## SigProfiler PART
-sigflow extract -i tcga_laml.maf.gz -o test_results/test_sigprofiler -m MAF -r 10 -T 4 --sigprofiler
+sigflow extract -i tcga_laml.maf.gz -o test_results/test_sigprofiler -m SBS -r 2 -T 4 --sigprofiler
 if [ $? -ne 0 ]; then
-    t9="failed at 'test_sigprofiler' in mode 'MAF'"
+    t9="failed at 'test_sigprofiler' in mode 'SBS'"
 else
     t9="succeed in test #9"
 fi

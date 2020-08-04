@@ -1,4 +1,4 @@
-# Sigflow: Streamline Analysis Workflow for Mutational Signatures
+# Sigflow: Streamline Analysis Workflows for Mutational Signatures
 
 <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/shixiangwang/sigminer.workflow"> <img alt="Docker Automated build" src="https://img.shields.io/docker/automated/shixiangwang/sigflow"> <img alt="Docker Image Version (latest by date)" src="https://img.shields.io/docker/v/shixiangwang/sigflow?color=blue"> <img alt="Docker Image Size (latest by date)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow"> <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/shixiangwang/sigflow">
 
@@ -34,6 +34,11 @@ Steps:
 install.packages("docopt")
 install.packages("BiocManager")
 BiocManager::install("sigminer", dependencies = TRUE)
+# Update Sigminer version
+install.packages("remotes")
+remotes::install_github("ShixiangWang/sigminer")
+# Install specific version by
+# remotes::install_github("ShixiangWang/sigminer@v1.0.10")
 ```
 
 3. Clone this repository, run
@@ -66,13 +71,11 @@ Use specified version (recommended way):
 $ docker pull shixiangwang/sigflow:0.1
 ```
 
+> NOTE: Sigflow version has no prefix `v`.
+
 Current available tag versions:
 
 - <img alt="Docker Image Version (tag latest semver)" src="https://img.shields.io/docker/v/shixiangwang/sigflow/0.1?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/0.1"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/0.1">
-
-Version platforms:
-
-- Sigflow 0.1 is based on Sigminer v1.0.9 in R v4.0.2
 
 Use latest version:
 
@@ -99,11 +102,17 @@ $ docker run --rm --entrypoint /bin/bash -it shixiangwang/sigflow
 
 ## Updates
 
-- 2020-07-29: release the first version of sigflow (0.1) using Docker.
+- 2020-08-05: Release Sigflow 1.0 and related Docker image. This version is based on Sigminer v1.0.10, R v4.0.2 and SigProfilerExtractor v.1.0.15.
+  - Supported SigProfiler.
+  - Added `verbose` option.
+  - Added `max` option.
+  - More flexible and reasonable configuration.
+- 2020-07-29: Release Sigflow 0.1 using Docker. Sigflow 0.1 is based on Sigminer v1.0.9 and R v4.0.2
 
 ## Usage
 
 ```
+=================================================================
 sigflow: Streamline Analysis Workflow for Mutational Signatures.
 
 Author: Shixiang Wang (wangshx@shanghaitech.edu.cn)
@@ -117,14 +126,14 @@ Desc:
             firstly you should set --manual to get signature estimation results,
             and secondly you should set --manual --number N to get N signatures.
   ==
-  fit     - fit signatures in >=1 samples.
+  fit     - fit signatures in >=1 samples based on COSMIC reference signatures.
   ==
   bt      - run bootstrap signature fitting analysis in >=1 samples.
 
 Usage:
-  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>]
-  sigflow fit --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>]
-  sigflow bt --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>]
+  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--verbose]
+  sigflow fit --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--verbose]
+  sigflow bt --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
   sigflow (-h | --help)
   sigflow --version
 
@@ -136,15 +145,19 @@ Options:
   -m <class>, --mode <class>      extract/fit mode, can be one of SBS, DBS, ID, MAF (for three types), CN (not supported in fit subcommand) [default: SBS].
   --manual                        enable manual extraction, set -N=0 for outputing signature estimation firstly.
   -N <sigs>, --number <sigs>      extract specified number of signatures [default: 0].
+  --max <max>                     maximum signature number, default is auto-configured, should >2 [default: -1].
   -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
   -r <runs>, --nrun <runs>        run times of NMF (extract) or bootstrapping (bt) to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
+  --sigprofiler                   enable auto-extraction by SigProfiler software
+  -v --verbose                    print extra info.
 
+=================================================================
 ```
 
 ## Test
 
-There are some example data in this repository, you can find how to test different workflows in [test/test.sh](test/test.sh).
+There are some example data sets in this repository, you can find how to test different workflows in [test/test.sh](test/test.sh).
 It is time consuming to run all tests, just pick an example test similar to your task and see how it works. Before releasing a new version of `sigflow`, I would run all tests to make sure they work well.
 
 ## Citation
@@ -157,6 +170,6 @@ If you are using **sigflow** fow now, please cite:
 
 ## License
 
-This software is release under [Academic Free License ("AFL") v. 3.0](https://opensource.org/licenses/AFL-3.0)
+This software is release under [Academic Free License ("AFL") v.3.0](https://opensource.org/licenses/AFL-3.0)
 
 Copyright 2020 © Shixiang Wang

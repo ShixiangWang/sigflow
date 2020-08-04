@@ -48,7 +48,7 @@ if (!require("docopt")) {
 }
 
 library("docopt")
-arguments <- docopt(doc, version = "sigflow v0.1\n")
+arguments <- docopt(doc, version = "sigflow v1.0\n")
 
 ## Stop error parsing
 if (!exists("arguments")) {
@@ -67,7 +67,7 @@ message("
 
 Name   :       sigflow
 Author :       Shixiang Wang
-Version:       0.1
+Version:       1.0
 License:       AFL 3.0
 Link   :       https://github.com/ShixiangWang/sigminer.workflow
 Doc    :       https://shixiangwang.github.io/sigminer-doc/

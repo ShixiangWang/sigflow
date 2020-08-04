@@ -4,7 +4,7 @@
 ## Extraction PART:
 
 #1
-sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf -m MAF -r 10 -T 4
+sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf -m MAF -r 10 -T 4 --max 10
 if [ $? -ne 0 ]; then
     t1="failed at 'test_maf' in mode 'MAF'"
 else
@@ -12,7 +12,7 @@ else
 fi
 
 #2
-sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf_SBS -m SBS -r 10 -T 4
+sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf_SBS -m SBS -r 10 -T 4 --max 10
 if [ $? -ne 0 ]; then
     t2="failed at 'test_maf' in mode 'SBS'"
 else
@@ -20,7 +20,7 @@ else
 fi
 
 #3
-sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf_ID -m ID -r 10 -T 4
+sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf_ID -m ID -r 10 -T 4 --max 10
 if [ $? -ne 0 ]; then
     t3="failed at 'test_maf' in mode 'ID'"
 else
@@ -28,7 +28,7 @@ else
 fi
 
 #4
-sigflow extract -i vcf/ -o test_results/test_vcf -m MAF -r 10 -T 4
+sigflow extract -i vcf/ -o test_results/test_vcf -m MAF -r 10 -T 4 --max 10
 if [ $? -ne 0 ]; then
     t4="failed at 'test_vcf' in mode 'MAF'"
 else
@@ -36,7 +36,7 @@ else
 fi
 
 #5
-sigflow extract -i example_cn.tsv -o test_results/test_cn -m CN -r 10 -T 4
+sigflow extract -i example_cn.tsv -o test_results/test_cn -m CN -r 10 -T 4 --max 5
 if [ $? -ne 0 ]; then
     t5="failed at 'test_cn' in mode 'CN'"
 else
@@ -69,15 +69,15 @@ else
 fi
 
 #8
-sigflow bt -i tcga_laml.maf.gz -o test_results/test_bt -m SBS -r 5
+sigflow bt -i tcga_laml.maf.gz -o test_results/test_bt -m SBS -r 5 --max 10 --verbose
 if [ $? -ne 0 ]; then
     t8="failed at 'test_bt' in mode 'SBS'"
 else
     t8="succeed in test #8"
 fi
 
-## SigProfiler PART
-sigflow extract -i tcga_laml.maf.gz -o test_results/test_sigprofiler -m SBS -r 2 -T 4 --sigprofiler
+# SigProfiler PART
+sigflow extract -i tcga_laml.maf.gz -o test_results/test_sigprofiler -m SBS -r 2 --max 10 -T 4 --sigprofiler
 if [ $? -ne 0 ]; then
     t9="failed at 'test_sigprofiler' in mode 'SBS'"
 else

@@ -14,14 +14,14 @@ Desc:
             firstly you should set --manual to get signature estimation results,
             and secondly you should set --manual --number N to get N signatures.
   ==
-  fit     - fit signatures in >=1 samples.
+  fit     - fit signatures in >=1 samples based on COSMIC reference signatures.
   ==
   bt      - run bootstrap signature fitting analysis in >=1 samples.
 
 Usage:
-  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler]
-  sigflow fit --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>]
-  sigflow bt --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>]
+  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--verbose]
+  sigflow fit --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--verbose]
+  sigflow bt --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
   sigflow (-h | --help)
   sigflow --version
 
@@ -33,10 +33,12 @@ Options:
   -m <class>, --mode <class>      extract/fit mode, can be one of SBS, DBS, ID, MAF (for three types), CN (not supported in fit subcommand) [default: SBS].
   --manual                        enable manual extraction, set -N=0 for outputing signature estimation firstly.
   -N <sigs>, --number <sigs>      extract specified number of signatures [default: 0].
+  --max <max>                     maximum signature number, default is auto-configured, should >2 [default: -1].
   -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
   -r <runs>, --nrun <runs>        run times of NMF (extract) or bootstrapping (bt) to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
   --sigprofiler                   enable auto-extraction by SigProfiler software
+  -v --verbose                    print extra info.
 
 =================================================================
 " -> doc
@@ -354,7 +356,7 @@ output_bootstrap <- function(x, result_dir, mut_type = "SBS") {
   }
 }
 
-flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir, sigprofiler = FALSE) {
+flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir, max_number = 100, sigprofiler = FALSE) {
   if (!dir.exists(file.path(result_dir, "results"))) {
     dir.create(file.path(result_dir, "results"), recursive = TRUE)
   }
@@ -408,7 +410,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
         sigprofiler_extract(
           nmf_matrix = tally_list$nmf_matrix,
           output = file.path(result_dir, "SigProfiler_CN"),
-          range = 2:min(30, nrow(tally_list$nmf_matrix) - 1),
+          range = 2:min(30, nrow(tally_list$nmf_matrix) - 1, max_number),
           nrun = nrun,
           cores = cores,
           use_conda = TRUE
@@ -420,7 +422,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           result_prefix = "BayesianNMF_CN",
           destdir = file.path(result_dir, "BayesianNMF"),
           strategy = "stable",
-          K0 = min(30, nrow(tally_list$nmf_matrix) - 1),
+          K0 = min(30, nrow(tally_list$nmf_matrix) - 1, max_number),
           nrun = nrun,
           cores = cores,
           skip = TRUE
@@ -434,7 +436,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             sigprofiler_extract(
               nmf_matrix = mat,
               output = file.path(result_dir, "SigProfiler_SBS"),
-              range = 2:min(30, nrow(mat) - 1),
+              range = 2:min(30, nrow(mat) - 1, max_number),
               nrun = nrun,
               cores = cores,
               use_conda = TRUE
@@ -446,7 +448,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               result_prefix = "BayesianNMF_SBS",
               destdir = file.path(result_dir, "BayesianNMF"),
               strategy = "stable",
-              K0 = min(30, nrow(mat) - 1),
+              K0 = min(30, nrow(mat) - 1, max_number),
               nrun = nrun,
               cores = cores,
               skip = TRUE
@@ -463,7 +465,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             sigprofiler_extract(
               nmf_matrix = mat,
               output = file.path(result_dir, "SigProfiler_DBS"),
-              range = 2:min(15, nrow(mat) - 1),
+              range = 2:min(15, nrow(mat) - 1, max_number),
               nrun = nrun,
               cores = cores,
               use_conda = TRUE
@@ -475,7 +477,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               result_prefix = "BayesianNMF_DBS",
               destdir = file.path(result_dir, "BayesianNMF"),
               strategy = "stable",
-              K0 = min(15, nrow(mat) - 1),
+              K0 = min(15, nrow(mat) - 1, max_number),
               nrun = nrun,
               cores = cores,
               skip = TRUE
@@ -492,7 +494,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             sigprofiler_extract(
               nmf_matrix = mat,
               output = file.path(result_dir, "SigProfiler_ID"),
-              range = 2:min(20, nrow(mat) - 1),
+              range = 2:min(20, nrow(mat) - 1, max_number),
               nrun = nrun,
               cores = cores,
               use_conda = TRUE
@@ -504,7 +506,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               result_prefix = "BayesianNMF_ID",
               destdir = file.path(result_dir, "BayesianNMF"),
               strategy = "stable",
-              K0 = min(20, nrow(mat) - 1),
+              K0 = min(20, nrow(mat) - 1, max_number),
               nrun = nrun,
               cores = cores,
               skip = TRUE
@@ -524,7 +526,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
         est_CN <- sig_estimate(
           nmf_matrix = tally_list$nmf_matrix,
           nrun = nrun,
-          range = 2:30,
+          range = 2:min(30, max_number),
           cores = cores,
           pConstant = 1e-9,
           save_plots = TRUE,
@@ -546,7 +548,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             est_SBS <- sig_estimate(
               nmf_matrix = mat,
               nrun = nrun,
-              range = 2:30,
+              range = 2:min(30, max_number),
               cores = cores,
               pConstant = 1e-9,
               save_plots = TRUE,
@@ -569,7 +571,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             est_DBS <- sig_estimate(
               nmf_matrix = mat,
               nrun = nrun,
-              range = 2:30,
+              range = 2:min(15, max_number),
               cores = cores,
               pConstant = 1e-9,
               save_plots = TRUE,
@@ -592,7 +594,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
             est_ID <- sig_estimate(
               nmf_matrix = mat,
               nrun = nrun,
-              range = 2:30,
+              range = 2:min(20, max_number),
               cores = cores,
               pConstant = 1e-9,
               save_plots = TRUE,
@@ -965,13 +967,33 @@ if (ARGS$extract) {
   }
   nrun <- as.integer(ARGS$nrun)
   cores <- min(as.integer(ARGS$cores), parallel::detectCores())
+  if (as.integer(ARGS$max) < 2) {
+    max_number <- 100
+  } else {
+    max_number <- as.integer(ARGS$max)
+  }
   tryCatch(
-    flow_extraction(
-      obj = obj, genome_build = genome_build, mode = ARGS$mode,
-      manual_step = manual_step, nrun = nrun, cores = cores,
-      result_dir = result_dir,
-      sigprofiler = ARGS$sigprofiler
-    ),
+    {
+      if (ARGS$verbose) {
+        flow_extraction(
+          obj = obj, genome_build = genome_build, mode = ARGS$mode,
+          manual_step = manual_step, nrun = nrun, cores = cores,
+          result_dir = result_dir,
+          max_number = max_number,
+          sigprofiler = ARGS$sigprofiler
+        )
+      } else {
+        suppressMessages(
+          flow_extraction(
+            obj = obj, genome_build = genome_build, mode = ARGS$mode,
+            manual_step = manual_step, nrun = nrun, cores = cores,
+            result_dir = result_dir,
+            max_number = max_number,
+            sigprofiler = ARGS$sigprofiler
+          )
+        )
+      }
+    },
     error = function(e) {
       message("An error is detected in extract process. Quit the program!")
       message(e$message)
@@ -981,10 +1003,21 @@ if (ARGS$extract) {
 } else if (ARGS$fit) {
   message("Running signature fitting pipeline...\n------")
   tryCatch(
-    flow_fitting(
-      obj = obj, genome_build = genome_build, mode = ARGS$mode,
-      result_dir = result_dir, prog = "fit"
-    ),
+    {
+      if (ARGS$verbose) {
+        flow_fitting(
+          obj = obj, genome_build = genome_build, mode = ARGS$mode,
+          result_dir = result_dir, prog = "fit"
+        )
+      } else {
+        suppressMessages(
+          flow_fitting(
+            obj = obj, genome_build = genome_build, mode = ARGS$mode,
+            result_dir = result_dir, prog = "fit"
+          )
+        )
+      }
+    },
     error = function(e) {
       message("An error is detected in fitting process. Quit the program!")
       message(e$message)
@@ -995,10 +1028,21 @@ if (ARGS$extract) {
   message("Running signature bootstrap fitting pipeline...\n------")
   nrun <- as.integer(ARGS$nrun)
   tryCatch(
-    flow_fitting(
-      obj = obj, genome_build = genome_build, mode = ARGS$mode,
-      result_dir = result_dir, nrun = nrun, prog = "bootstrap"
-    ),
+    {
+      if (ARGS$verbose) {
+        flow_fitting(
+          obj = obj, genome_build = genome_build, mode = ARGS$mode,
+          result_dir = result_dir, nrun = nrun, prog = "bootstrap"
+        )
+      } else {
+        suppressMessages(
+          flow_fitting(
+            obj = obj, genome_build = genome_build, mode = ARGS$mode,
+            result_dir = result_dir, nrun = nrun, prog = "bootstrap"
+          )
+        )
+      }
+    },
     error = function(e) {
       message("An error is detected in bootstrap fitting process. Quit the program!")
       message(e$message)
@@ -1010,5 +1054,7 @@ if (ARGS$extract) {
 # End part ----------------------------------------------------------------
 
 message("
+Please check the output directory.
+Thanks for using Sigflow!
 ============================== END
 ")

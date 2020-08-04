@@ -3,9 +3,9 @@ FROM r-base:4.0.2
 LABEL \
     author="Shixiang Wang" \
     maintainer="Shixiang Wang" \
-    email="w_shixiang@163.com" \
+    email="wangshx@shanghaitech.edu.cn" \
     description="Docker Image for Sigflow" \
-    org.label-schema.license="Academic Free License v. 3.0" \
+    org.label-schema.license="Academic Free License v.3.0" \
     org.label-schema.vcs-url="https://github.com/ShixiangWang/sigminer.workflow/" \
     org.label-schema.vendor="XSLiu Lab Project"
 
@@ -20,10 +20,10 @@ RUN R -e "BiocManager::install('BSgenome')" && \
     R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')" && \
     R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')" && \
     R -e "BiocManager::install('BSgenome.Mmusculus.UCSC.mm10')"
-## Install sigminer & Sigprofiler
+## Install sigminer & SigProfiler & test SigProfiler
 RUN R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.10', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/* && \
-    R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_M.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_M[['nmf_matrix']]; print(mat); sigprofiler_extract(mat, '/opt/test_sp_install', range = 3:4, nrun = 2L, use_conda = TRUE)" && \
+    R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_M.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_M[['nmf_matrix']]; print(mat); sigprofiler_extract(mat, '/opt/test_sp_install', range = 3:4, nrun = 2L, use_conda = TRUE); sigprofiler_import('/opt/test_sp_install')" && \
     rm -rf /opt/test_sp_install && \
     /root/.local/share/r-miniconda/bin/conda clean -afy
 ## Copy sigflow program and run test

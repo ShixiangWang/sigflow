@@ -44,7 +44,7 @@ Options:
 =================================================================
 " -> doc
 
-if (!require("docopt")) {
+if (!suppressMessages(require("docopt"))) {
   install.packages("docopt", repos = "https://cloud.r-project.org")
 }
 
@@ -375,7 +375,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
     ref_genome <- "BSgenome.Mmusculus.UCSC.mm10"
   }
 
-  if (!require(ref_genome, character.only = TRUE)) {
+  if (!suppressMessages(require(ref_genome, character.only = TRUE))) {
     sigminer:::send_info("Package ", ref_genome, " not found, try installing.")
     BiocManager::install(ref_genome)
   }
@@ -754,7 +754,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
     ref_genome <- "BSgenome.Mmusculus.UCSC.mm10"
   }
 
-  if (!require(ref_genome, character.only = TRUE)) {
+  if (!suppressMessages(require(ref_genome, character.only = TRUE))) {
     sigminer:::send_info("Package ", ref_genome, " not found, try installing.")
     BiocManager::install(ref_genome)
   }
@@ -935,7 +935,7 @@ genome_build <- ARGS$genome
 result_dir <- path.expand(ARGS$output)
 
 if (any(endsWith(input, c("xls", "xlsx")))) {
-  if (!require("readxl")) {
+  if (!suppressMessages(require("readxl"))) {
     message("readxl not found, try installing.")
     install.packages("readxl")
     library("readxl")

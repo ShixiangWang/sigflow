@@ -40,7 +40,7 @@ WORKDIR /root
 ## When ENTRYPOINT is used, the docker can be only run as a command 
 ## unless specify --entrypoint /bin/bash to access docker terminal
 ## see: https://phoenixnap.com/kb/docker-run-override-entrypoint
-## sudo docker run -it --entrypoint bash shixiangwang/sigflow
+## sudo docker run -it --rm --entrypoint bash shixiangwang/sigflow
 ENTRYPOINT [ "sigflow" ]
 CMD [ "--help" ]
 ## Can entrypoint directly input outside files?

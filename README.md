@@ -106,6 +106,7 @@ $ docker run --rm --entrypoint /bin/bash -it shixiangwang/sigflow
   - Supported SigProfiler.
   - Added `verbose` option.
   - Added `max` option.
+  - Added `hyper` option.
   - More flexible and reasonable configuration.
 - 2020-07-29: Release Sigflow 0.1 using Docker. Sigflow 0.1 is based on Sigminer v1.0.9 and R v4.0.2
 
@@ -131,9 +132,9 @@ Desc:
   bt      - run bootstrap signature fitting analysis in >=1 samples.
 
 Usage:
-  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--verbose]
+  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--hyper] [--verbose]
   sigflow fit --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--verbose]
-  sigflow bt --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
+  sigflow bt  --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
   sigflow (-h | --help)
   sigflow --version
 
@@ -149,8 +150,9 @@ Options:
   -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
   -r <runs>, --nrun <runs>        run times of NMF (extract) or bootstrapping (bt) to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
-  --sigprofiler                   enable auto-extraction by SigProfiler software
-  -v --verbose                    print extra info.
+  --hyper                         enable hyper mutation handling in COSMIC signatures (not used by SigProfiler approach).
+  --sigprofiler                   enable auto-extraction by SigProfiler software.
+  -v, --verbose                   print verbose message.
 
 =================================================================
 ```

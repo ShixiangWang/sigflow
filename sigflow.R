@@ -19,9 +19,9 @@ Desc:
   bt      - run bootstrap signature fitting analysis in >=1 samples.
 
 Usage:
-  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--verbose]
+  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--hyper] [--verbose]
   sigflow fit --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--verbose]
-  sigflow bt --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
+  sigflow bt  --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
   sigflow (-h | --help)
   sigflow --version
 
@@ -37,8 +37,9 @@ Options:
   -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
   -r <runs>, --nrun <runs>        run times of NMF (extract) or bootstrapping (bt) to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
-  --sigprofiler                   enable auto-extraction by SigProfiler software
-  -v --verbose                    print extra info.
+  --hyper                         enable hyper mutation handling in COSMIC signatures (not used by SigProfiler approach).
+  --sigprofiler                   enable auto-extraction by SigProfiler software.
+  -v, --verbose                   print verbose message.
 
 =================================================================
 " -> doc
@@ -356,7 +357,8 @@ output_bootstrap <- function(x, result_dir, mut_type = "SBS") {
   }
 }
 
-flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir, max_number = 100, sigprofiler = FALSE) {
+flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir,
+                            max_number = 100, rm_hyper = FALSE, sigprofiler = FALSE) {
   if (!dir.exists(file.path(result_dir, "results"))) {
     dir.create(file.path(result_dir, "results"), recursive = TRUE)
   }
@@ -416,6 +418,8 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           use_conda = TRUE
         )
         sigs_CN <- sigprofiler_import(file.path(result_dir, "SigProfiler_CN"))
+        data.table::fwrite(sigs_CN$all_stats, file = file.path(result_dir, "results", "SigProfiler_CN_stats.csv"))
+        sigs_CN <- sigs_CN$solution
       } else {
         sigs_CN <- sig_auto_extract(
           nmf_matrix = tally_list$nmf_matrix,
@@ -442,7 +446,12 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               use_conda = TRUE
             )
             sigs_SBS <- sigprofiler_import(file.path(result_dir, "SigProfiler_SBS"))
+            data.table::fwrite(sigs_SBS$all_stats, file = file.path(result_dir, "results", "SigProfiler_SBS_stats.csv"))
+            sigs_SBS <- sigs_SBS$solution
           } else {
+            if (rm_hyper) {
+              mat <- sigminer::handle_hyper_mutation(mat)
+            }
             sigs_SBS <- sig_auto_extract(
               nmf_matrix = mat,
               result_prefix = "BayesianNMF_SBS",
@@ -471,7 +480,12 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               use_conda = TRUE
             )
             sigs_DBS <- sigprofiler_import(file.path(result_dir, "SigProfiler_DBS"))
+            data.table::fwrite(sigs_DBS$all_stats, file = file.path(result_dir, "results", "SigProfiler_DBS_stats.csv"))
+            sigs_DBS <- sigs_DBS$solution
           } else {
+            if (rm_hyper) {
+              mat <- sigminer::handle_hyper_mutation(mat)
+            }
             sigs_DBS <- sig_auto_extract(
               nmf_matrix = mat,
               result_prefix = "BayesianNMF_DBS",
@@ -500,7 +514,12 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               use_conda = TRUE
             )
             sigs_ID <- sigprofiler_import(file.path(result_dir, "SigProfiler_ID"))
+            data.table::fwrite(sigs_ID$all_stats, file = file.path(result_dir, "results", "SigProfiler_ID_stats.csv"))
+            sigs_ID <- sigs_ID$solution
           } else {
+            if (rm_hyper) {
+              mat <- sigminer::handle_hyper_mutation(mat)
+            }
             sigs_ID <- sig_auto_extract(
               nmf_matrix = mat,
               result_prefix = "BayesianNMF_ID",
@@ -647,6 +666,9 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           mat <- tally_list$SBS_96
 
           if (!is.null(mat)) {
+            if (rm_hyper) {
+              mat <- sigminer::handle_hyper_mutation(mat)
+            }
             sigs_SBS <- sig_extract(
               nmf_matrix = mat,
               n_sig = manual_step,
@@ -661,6 +683,9 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           mat <- tally_list$DBS_78
 
           if (!is.null(mat)) {
+            if (rm_hyper) {
+              mat <- sigminer::handle_hyper_mutation(mat)
+            }
             sigs_DBS <- sig_extract(
               nmf_matrix = mat,
               n_sig = manual_step,
@@ -675,6 +700,9 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           mat <- tally_list$ID_83
 
           if (!is.null(mat)) {
+            if (rm_hyper) {
+              mat <- sigminer::handle_hyper_mutation(mat)
+            }
             sigs_ID <- sig_extract(
               nmf_matrix = mat,
               n_sig = manual_step,
@@ -705,7 +733,6 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
 
   return(invisible(NULL))
 }
-
 
 
 flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog = c("fit", "bootstrap")) {
@@ -980,6 +1007,7 @@ if (ARGS$extract) {
           manual_step = manual_step, nrun = nrun, cores = cores,
           result_dir = result_dir,
           max_number = max_number,
+          rm_hyper = ARGS$hyper,
           sigprofiler = ARGS$sigprofiler
         )
       } else {
@@ -989,6 +1017,7 @@ if (ARGS$extract) {
             manual_step = manual_step, nrun = nrun, cores = cores,
             result_dir = result_dir,
             max_number = max_number,
+            rm_hyper = ARGS$hyper,
             sigprofiler = ARGS$sigprofiler
           )
         )

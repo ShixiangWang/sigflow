@@ -114,7 +114,7 @@ $ docker run --rm --entrypoint /bin/bash -it shixiangwang/sigflow
 
 ```
 =================================================================
-sigflow: Streamline Analysis Workflow for Mutational Signatures.
+sigflow: Streamline Analysis Workflows for Mutational Signatures.
 
 Author: Shixiang Wang (wangshx@shanghaitech.edu.cn)
 Copyright: AFL@2020 [https://opensource.org/licenses/AFL-3.0]
@@ -164,7 +164,7 @@ It is time consuming to run all tests, just pick an example test similar to your
 
 ## Citation
 
-**sigflow: Streamline Analysis Workflow for Mutational Signatures**, *under preparation*.
+**Sigflow: automated workflows for mutational signature analysis**, *under preparation*.
 
 If you are using **sigflow** fow now, please cite:
 
@@ -172,6 +172,6 @@ If you are using **sigflow** fow now, please cite:
 
 ## License
 
-This software is release under [Academic Free License ("AFL") v.3.0](https://opensource.org/licenses/AFL-3.0)
+This software is released under [Academic Free License ("AFL") v.3.0](https://opensource.org/licenses/AFL-3.0)
 
 Copyright 2020 © Shixiang Wang

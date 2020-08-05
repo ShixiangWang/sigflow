@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 "=================================================================
-sigflow: Streamline Analysis Workflow for Mutational Signatures.
+sigflow: Streamline Analysis Workflows for Mutational Signatures.
 
 Author: Shixiang Wang (wangshx@shanghaitech.edu.cn)
 Copyright: AFL@2020 [https://opensource.org/licenses/AFL-3.0]

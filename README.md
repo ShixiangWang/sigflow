@@ -161,11 +161,11 @@ Options:
 ## Test
 
 There are some example data sets in this repository, you can find how to test different workflows in [test/test.sh](test/test.sh).
-It is time consuming to run all tests, just pick an example test similar to your task and see how it works. Before releasing a new version of `sigflow`, I would run all tests to make sure they work well.
+It is time consuming to run all tests, just pick an example test similar to your task and see how it works. Before releasing a new version of **Sigflow**, I would run all tests to make sure they work well.
 
 ## Citation
 
-The Sigflow has not been formly published, if you are using **sigflow** fow now, please cite:
+The **Sigflow** has not been formly published, if you are using **Sigflow** fow now, please cite:
 
 Sigflow: an automated and comprehensive pipeline for cancer genome mutational signature analysis.
 Shixiang Wang, Ziyu Tao, Tao Wu, Xue-Song Liu.

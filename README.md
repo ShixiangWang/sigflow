@@ -165,11 +165,11 @@ It is time consuming to run all tests, just pick an example test similar to your
 
 ## Citation
 
-**Sigflow: automated workflows for mutational signature analysis**, *under preparation*.
+The Sigflow has not been formly published, if you are using **sigflow** fow now, please cite:
 
-If you are using **sigflow** fow now, please cite:
-
-**Wang, Shixiang, et al. “Copy number signature analyses in prostate cancer reveal distinct etiologies and clinical outcomes” medRxiv (2020)** https://www.medrxiv.org/content/early/2020/04/29/2020.04.27.20082404
+Sigflow: an automated and comprehensive pipeline for cancer genome mutational signature analysis.
+Shixiang Wang, Ziyu Tao, Tao Wu, Xue-Song Liu.
+bioRxiv 2020.08.12.247528; doi: https://doi.org/10.1101/2020.08.12.247528
 
 ## License
 

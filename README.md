@@ -103,6 +103,7 @@ $ docker run --rm --entrypoint /bin/bash -it shixiangwang/sigflow
 
 ## Updates
 
+- 2020-08-14: Use sigminer v1.0.11 to use SigProfilerExtractor v1.0.15 to avoid issue raised from SigProfilerExtractor updates.
 - 2020-08-05: Release Sigflow 1.0 and related Docker image. This version is based on Sigminer v1.0.10, R v4.0.2 and SigProfilerExtractor v.1.0.15.
   - Supported SigProfiler.
   - Added `verbose` option.

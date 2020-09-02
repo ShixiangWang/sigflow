@@ -103,6 +103,7 @@ $ docker run --rm --entrypoint /bin/bash -it shixiangwang/sigflow
 
 ## Updates
 
+- 2020-09-03: Use sigminer v1.0.14 and support inputing reference signature index in `fit` and `bt` commands.
 - 2020-08-14: Use sigminer v1.0.11 to use SigProfilerExtractor v1.0.15 to avoid issue raised from SigProfilerExtractor updates.
 - 2020-08-05: Release Sigflow 1.0 and related Docker image. This version is based on Sigminer v1.0.10, R v4.0.2 and SigProfilerExtractor v.1.0.15.
   - Supported SigProfiler.
@@ -135,8 +136,8 @@ Desc:
 
 Usage:
   sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--hyper] [--verbose]
-  sigflow fit --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--verbose]
-  sigflow bt  --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
+  sigflow fit --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--verbose]
+  sigflow bt  --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
   sigflow (-h | --help)
   sigflow --version
 
@@ -145,6 +146,7 @@ Options:
   --version     Show version.
   -i <file>, --input <file>       input file/directory path.
   -o <outdir>, --output <outdir>  output directory path [default: ./sigflow_result/].
+  --index <index>                 reference signature index separated by comma, e.g. '1,2,3' [default: ALL].
   -m <class>, --mode <class>      extract/fit mode, can be one of SBS, DBS, ID, MAF (for three types), CN (not supported in fit subcommand) [default: SBS].
   --manual                        enable manual extraction, set -N=0 for outputing signature estimation firstly.
   -N <sigs>, --number <sigs>      extract specified number of signatures [default: 0].

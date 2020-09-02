@@ -20,8 +20,8 @@ Desc:
 
 Usage:
   sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--hyper] [--verbose]
-  sigflow fit --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--verbose]
-  sigflow bt  --input=<file> [--output=<outdir>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
+  sigflow fit --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--verbose]
+  sigflow bt  --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
   sigflow (-h | --help)
   sigflow --version
 
@@ -30,6 +30,7 @@ Options:
   --version     Show version.
   -i <file>, --input <file>       input file/directory path.
   -o <outdir>, --output <outdir>  output directory path [default: ./sigflow_result/].
+  --index <index>                 reference signature index separated by comma, e.g. '1,2,3' [default: ALL].
   -m <class>, --mode <class>      extract/fit mode, can be one of SBS, DBS, ID, MAF (for three types), CN (not supported in fit subcommand) [default: SBS].
   --manual                        enable manual extraction, set -N=0 for outputing signature estimation firstly.
   -N <sigs>, --number <sigs>      extract specified number of signatures [default: 0].
@@ -49,7 +50,7 @@ if (!suppressMessages(require("docopt"))) {
 }
 
 library("docopt")
-arguments <- docopt(doc, version = "sigflow v1.0\n")
+arguments <- docopt(doc, version = "sigflow v1.1\n")
 
 ## Stop error parsing
 if (!exists("arguments")) {
@@ -68,7 +69,7 @@ message("
 
 Name   :       sigflow
 Author :       Shixiang Wang
-Version:       1.0
+Version:       1.1
 License:       AFL 3.0
 Link   :       https://github.com/ShixiangWang/sigminer.workflow
 Doc    :       https://shixiangwang.github.io/sigminer-doc/
@@ -470,7 +471,9 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
 }
 
 
-flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog = c("fit", "bootstrap")) {
+flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
+                         index = "ALL",
+                         prog = c("fit", "bootstrap")) {
   prog <- match.arg(prog)
 
   if (!dir.exists(file.path(result_dir, "results"))) {
@@ -525,7 +528,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
         ## COSMIC V2 SBS
         fit_legacy <- sig_fit(
           catalogue_matrix = mat,
-          sig_index = "ALL",
+          sig_index = index,
           sig_db = "legacy",
           mode = "SBS",
           return_class = "data.table",
@@ -535,7 +538,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
 
         fit_SBS <- sig_fit(
           catalogue_matrix = mat,
-          sig_index = "ALL",
+          sig_index = index,
           sig_db = "SBS",
           mode = "SBS",
           return_class = "data.table",
@@ -551,7 +554,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
         mat <- t(mat)
         fit_DBS <- sig_fit(
           catalogue_matrix = mat,
-          sig_index = "ALL",
+          sig_index = index,
           sig_db = "DBS",
           mode = "DBS",
           return_class = "data.table",
@@ -567,7 +570,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
         mat <- t(mat)
         fit_ID <- sig_fit(
           catalogue_matrix = mat,
-          sig_index = "ALL",
+          sig_index = index,
           sig_db = "ID",
           mode = "ID",
           return_class = "data.table",
@@ -586,7 +589,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
         ## COSMIC V2 SBS
         bt_legacy <- sig_fit_bootstrap_batch(
           catalogue_matrix = mat,
-          sig_index = "ALL",
+          sig_index = index,
           sig_db = "legacy",
           mode = "SBS",
           n = nrun,
@@ -600,7 +603,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
 
         bt_SBS <- sig_fit_bootstrap_batch(
           catalogue_matrix = mat,
-          sig_index = "ALL",
+          sig_index = index,
           sig_db = "SBS",
           mode = "SBS",
           n = nrun,
@@ -620,7 +623,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
         mat <- t(mat)
         bt_DBS <- sig_fit_bootstrap_batch(
           catalogue_matrix = mat,
-          sig_index = "ALL",
+          sig_index = index,
           sig_db = "DBS",
           mode = "DBS",
           n = nrun,
@@ -640,7 +643,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL, prog 
         mat <- t(mat)
         bt_ID <- sig_fit_bootstrap_batch(
           catalogue_matrix = mat,
-          sig_index = "ALL",
+          sig_index = index,
           sig_db = "ID",
           mode = "ID",
           n = nrun,
@@ -771,13 +774,13 @@ if (ARGS$extract) {
       if (ARGS$verbose) {
         flow_fitting(
           obj = obj, genome_build = genome_build, mode = ARGS$mode,
-          result_dir = result_dir, prog = "fit"
+          result_dir = result_dir, index = ARGS$index, prog = "fit"
         )
       } else {
         suppressMessages(
           flow_fitting(
             obj = obj, genome_build = genome_build, mode = ARGS$mode,
-            result_dir = result_dir, prog = "fit"
+            result_dir = result_dir, index = ARGS$index, prog = "fit"
           )
         )
       }
@@ -796,13 +799,13 @@ if (ARGS$extract) {
       if (ARGS$verbose) {
         flow_fitting(
           obj = obj, genome_build = genome_build, mode = ARGS$mode,
-          result_dir = result_dir, nrun = nrun, prog = "bootstrap"
+          result_dir = result_dir, nrun = nrun, index = ARGS$index, prog = "bootstrap"
         )
       } else {
         suppressMessages(
           flow_fitting(
             obj = obj, genome_build = genome_build, mode = ARGS$mode,
-            result_dir = result_dir, nrun = nrun, prog = "bootstrap"
+            result_dir = result_dir, nrun = nrun, index = ARGS$index, prog = "bootstrap"
           )
         )
       }

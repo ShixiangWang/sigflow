@@ -106,6 +106,7 @@ $ docker run --rm --entrypoint /bin/bash -it shixiangwang/sigflow
 - 2020-09-03: 
   - Use sigminer v1.0.15 and support inputing reference signature index in `fit` and `bt` commands.
   - Allow users to decide if refit the signature exposures after *de novo* extraction with `refit` option.
+  - Support matrix as input.
 - 2020-08-14: Use sigminer v1.0.11 to use SigProfilerExtractor v1.0.15 to avoid issue raised from SigProfilerExtractor updates.
 - 2020-08-05: **Release Sigflow 1.0** and related Docker image. This version is based on Sigminer v1.0.10, R v4.0.2 and SigProfilerExtractor v.1.0.15.
   - Supported SigProfiler.
@@ -137,7 +138,7 @@ Desc:
   bt      - run bootstrap signature fitting analysis in >=1 samples.
 
 Usage:
-  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--hyper] [--verbose]
+  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--refit] [--hyper] [--verbose]
   sigflow fit --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--verbose]
   sigflow bt  --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
   sigflow (-h | --help)
@@ -146,7 +147,7 @@ Usage:
 Options:
   -h --help     Show help message.
   --version     Show version.
-  -i <file>, --input <file>       input file/directory path.
+  -i <file>, --input <file>       input CSV/EXCEL/MAF file or VCF directory path.
   -o <outdir>, --output <outdir>  output directory path [default: ./sigflow_result/].
   --index <index>                 reference signature index separated by comma, e.g. '1,2,3' [default: ALL].
   -m <class>, --mode <class>      extract/fit mode, can be one of SBS, DBS, ID, MAF (for three types), CN (not supported in fit subcommand) [default: SBS].
@@ -156,6 +157,7 @@ Options:
   -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
   -r <runs>, --nrun <runs>        run times of NMF (extract) or bootstrapping (bt) to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
+  --refit                         refit the denovo signatures with quadratic programming or nnls.
   --hyper                         enable hyper mutation handling in COSMIC signatures (not used by SigProfiler approach).
   --sigprofiler                   enable auto-extraction by SigProfiler software.
   -v, --verbose                   print verbose message.

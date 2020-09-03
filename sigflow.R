@@ -28,7 +28,7 @@ Usage:
 Options:
   -h --help     Show help message.
   --version     Show version.
-  -i <file>, --input <file>       input file/directory path.
+  -i <file>, --input <file>       input CSV/EXCEL/MAF file or VCF directory path.
   -o <outdir>, --output <outdir>  output directory path [default: ./sigflow_result/].
   --index <index>                 reference signature index separated by comma, e.g. '1,2,3' [default: ALL].
   -m <class>, --mode <class>      extract/fit mode, can be one of SBS, DBS, ID, MAF (for three types), CN (not supported in fit subcommand) [default: SBS].
@@ -89,6 +89,7 @@ for (i in seq_along(ARGS)) {
     message(names(ARGS)[i], "\t\t: ", ARGS[i])
   }
 }
+
 message("------\n")
 
 # Function part -----------------------------------------------------------
@@ -124,7 +125,18 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
       mode <- "ALL"
     }
     if (manual_step <= 0) {
-      tally_list <- sig_tally(obj, mode = "ALL", ref_genome = ref_genome)
+      if (!is.matrix(obj)) {
+        tally_list <- sig_tally(obj, mode = "ALL", ref_genome = ref_genome)
+      } else {
+       ## Construct a fake tally result
+       ## In this situation, mode cannot be ALL
+       mm <- switch(mode,
+                    SBS = "SBS_96",
+                    DBS = "DBS_78",
+                    ID = "ID_83")
+       tally_list <- list()
+       tally_list[[mm]] <- obj %>% t()
+      }
       save(tally_list, file = file.path(result_dir, "maf_tally.RData"))
       if (!is.null(tally_list$SBS_96) & mode %in% c("SBS", "ALL")) {
         output_tally(tally_list$SBS_96 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
@@ -138,7 +150,12 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
     }
   } else {
     if (manual_step <= 0) {
-      tally_list <- sig_tally(obj, ignore_chrs = c("chrX", "chrY"), cores = cores)
+      if (!is.matrix(obj)) {
+        tally_list <- sig_tally(obj, ignore_chrs = c("chrX", "chrY"), cores = cores)
+      } else {
+        tally_list <- list()
+        tally_list[["nmf_matrix"]] <- obj %>% t()
+      }
       save(tally_list, file = file.path(result_dir, "cn_tally.RData"))
       output_tally(tally_list, result_dir = file.path(result_dir, "results"), mut_type = "CN")
     }
@@ -161,6 +178,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
         data.table::fwrite(sigs_CN$all_stats, file = file.path(result_dir, "results", "SigProfiler_CN_stats.csv"))
         sigs_CN <- sigs_CN$solution
       } else {
+        sigminer:::send_info("Auto extract copy number signatures.")
         sigs_CN <- sig_auto_extract(
           nmf_matrix = tally_list$nmf_matrix,
           result_prefix = "BayesianNMF_CN",
@@ -177,6 +195,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
       if (mode == "ALL" | mode == "SBS") {
         mat <- tally_list$SBS_96
         if (!is.null(mat)) {
+          sigminer:::send_info("Auto extract SBS signatures.")
           if (sigprofiler) {
             sigprofiler_extract(
               nmf_matrix = mat,
@@ -213,6 +232,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
       if (mode == "ALL" | mode == "DBS") {
         mat <- tally_list$DBS_78
         if (!is.null(mat)) {
+          sigminer:::send_info("Auto extract DBS signatures.")
           if (sigprofiler) {
             sigprofiler_extract(
               nmf_matrix = mat,
@@ -249,6 +269,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
       if (mode == "ALL" | mode == "ID") {
         mat <- tally_list$ID_83
         if (!is.null(mat)) {
+          sigminer:::send_info("Auto extract ID signatures.")
           if (sigprofiler) {
             sigprofiler_extract(
               nmf_matrix = mat,
@@ -672,9 +693,15 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
 
 # Action part -------------------------------------------------------------
 ## Check inputs and call the working functions
-suppressPackageStartupMessages(library("sigminer"))
-suppressPackageStartupMessages(library("ggplot2"))
-suppressPackageStartupMessages(library("pheatmap"))
+suppressMessages(library("sigminer"))
+suppressMessages(library("ggplot2"))
+suppressMessages(library("pheatmap"))
+
+if (ARGS$verbose) {
+  message()
+  message("Library:\t", paste(.libPaths(), collapse = "\t"))
+  print(utils::sessionInfo())
+}
 
 message("Reading file...\n------")
 
@@ -717,7 +744,31 @@ if (!isCN) {
       message("Try parsing VCF files...")
       obj <- sigminer::read_vcf(fs, genome_build = genome_build, keep_only_pass = FALSE, verbose = TRUE)
     } else {
-      obj <- sigminer::read_maf(input, verbose = TRUE)
+      message("Try reading as a MAF file.")
+      if (!is.data.frame(input)) {
+        obj <- suppressMessages(data.table::fread(input, header = TRUE, data.table = FALSE))
+      } else {
+        obj <- input
+      }
+      if (!"Tumor_Sample_Barcode" %in% colnames(obj)) {
+        message("No 'Tumor_Sample_Barcode' column detected, try parsing as a component-by-sample matrix.")
+        rownames(obj) <- obj[[1]]
+        obj[[1]] <- NULL
+        obj <- as.matrix(obj)
+        message("Read as a matrix done.")
+      } else {
+        obj <- tryCatch(
+          sigminer::read_maf(obj, verbose = TRUE),
+          error = function(e) {
+            message("Read input as a MAF file failed, try parsing as a component-by-sample matrix.")
+            rownames(obj) <- obj[[1]]
+            obj[[1]] <- NULL
+            obj <- as.matrix(obj)
+            message("Read as a matrix done.")
+            return(obj)
+          }
+        )
+      }
     }
     save(obj, file = file.path(result_dir, "maf_obj.RData"))
   } else {
@@ -725,7 +776,31 @@ if (!isCN) {
   }
 } else {
   if (!file.exists(file.path(result_dir, "cn_obj.RData"))) {
-    obj <- sigminer::read_copynumber(input, genome_build = genome_build, verbose = TRUE)
+    message("Try reading as a Segment file.")
+    if (!is.data.frame(input)) {
+      obj <- suppressMessages(data.table::fread(input, header = TRUE, data.table = FALSE))
+    } else {
+      obj <- input
+    }
+    if (!"sample" %in% colnames(obj)) {
+      message("No 'sample' column detected, try parsing as a component-by-sample matrix.")
+      rownames(obj) <- obj[[1]]
+      obj[[1]] <- NULL
+      obj <- as.matrix(obj)
+      message("Read as a matrix done.")
+    } else {
+      obj <- tryCatch(
+        sigminer::read_copynumber(obj, genome_build = genome_build, verbose = TRUE),
+        error = function(e) {
+          message("Read input as a Segment file failed, try parsing as a component-by-sample matrix.")
+          rownames(obj) <- obj[[1]]
+          obj[[1]] <- NULL
+          obj <- as.matrix(obj)
+          message("Read as a matrix done.")
+          return(obj)
+        }
+      )
+    }
     save(obj, file = file.path(result_dir, "cn_obj.RData"))
   } else {
     load(file = file.path(result_dir, "cn_obj.RData"))

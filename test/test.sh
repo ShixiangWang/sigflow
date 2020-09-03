@@ -43,6 +43,14 @@ else
     t5="succeed in test #5"
 fi
 
+#10
+sigflow extract -i example_mat.csv -o test_results/test_cn_mat -m CN -r 10 -T 4 --max 5
+if [ $? -ne 0 ]; then
+    t10="failed at 'test_cn_mat' in mode 'CN'"
+else
+    t10="succeed in test #10"
+fi
+
 #6
 sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf_manual -m SBS -r 10 -T 4 --manual -g hg19
 if [ $? -ne 0 ]; then
@@ -96,4 +104,5 @@ echo "$t6_1; $t6_2"
 echo $t7
 echo $t8
 echo $t9
+echo $t10
 echo ===========================================

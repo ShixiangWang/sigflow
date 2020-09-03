@@ -103,15 +103,17 @@ $ docker run --rm --entrypoint /bin/bash -it shixiangwang/sigflow
 
 ## Updates
 
-- 2020-09-03: Use sigminer v1.0.14 and support inputing reference signature index in `fit` and `bt` commands.
+- 2020-09-03: 
+  - Use sigminer v1.0.15 and support inputing reference signature index in `fit` and `bt` commands.
+  - Allow users to decide if refit the signature exposures after *de novo* extraction with `refit` option.
 - 2020-08-14: Use sigminer v1.0.11 to use SigProfilerExtractor v1.0.15 to avoid issue raised from SigProfilerExtractor updates.
-- 2020-08-05: Release Sigflow 1.0 and related Docker image. This version is based on Sigminer v1.0.10, R v4.0.2 and SigProfilerExtractor v.1.0.15.
+- 2020-08-05: **Release Sigflow 1.0** and related Docker image. This version is based on Sigminer v1.0.10, R v4.0.2 and SigProfilerExtractor v.1.0.15.
   - Supported SigProfiler.
   - Added `verbose` option.
   - Added `max` option.
   - Added `hyper` option.
   - More flexible and reasonable configuration.
-- 2020-07-29: Release Sigflow 0.1 using Docker. Sigflow 0.1 is based on Sigminer v1.0.9 and R v4.0.2
+- 2020-07-29: **Release Sigflow 0.1** using Docker. Sigflow 0.1 is based on Sigminer v1.0.9 and R v4.0.2
 
 ## Usage
 

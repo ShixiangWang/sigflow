@@ -19,7 +19,7 @@ Desc:
   bt      - run bootstrap signature fitting analysis in >=1 samples.
 
 Usage:
-  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--hyper] [--verbose]
+  sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--refit] [--hyper] [--verbose]
   sigflow fit --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--verbose]
   sigflow bt  --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
   sigflow (-h | --help)
@@ -38,6 +38,7 @@ Options:
   -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
   -r <runs>, --nrun <runs>        run times of NMF (extract) or bootstrapping (bt) to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
+  --refit                         refit the denovo signatures with quadratic programming or nnls.
   --hyper                         enable hyper mutation handling in COSMIC signatures (not used by SigProfiler approach).
   --sigprofiler                   enable auto-extraction by SigProfiler software.
   -v, --verbose                   print verbose message.
@@ -94,7 +95,9 @@ message("------\n")
 ## Program to go
 
 flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir,
-                            max_number = 100, rm_hyper = FALSE, sigprofiler = FALSE) {
+                            max_number = 100, 
+                            refit = TRUE,
+                            rm_hyper = FALSE, sigprofiler = FALSE) {
   if (!dir.exists(file.path(result_dir, "results"))) {
     dir.create(file.path(result_dir, "results"), recursive = TRUE)
   }
@@ -150,6 +153,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           output = file.path(result_dir, "SigProfiler_CN"),
           range = 2:min(30, nrow(tally_list$nmf_matrix) - 1, max_number),
           nrun = nrun,
+          refit = refit,
           cores = cores,
           use_conda = TRUE
         )
@@ -165,6 +169,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           K0 = min(30, nrow(tally_list$nmf_matrix) - 1, max_number),
           nrun = nrun,
           cores = cores,
+          optimize = refit,
           skip = TRUE
         )
       }
@@ -178,6 +183,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               output = file.path(result_dir, "SigProfiler_SBS"),
               range = 2:min(30, nrow(mat) - 1, max_number),
               nrun = nrun,
+              refit = refit,
               cores = cores,
               use_conda = TRUE
             )
@@ -196,6 +202,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               K0 = min(30, nrow(mat) - 1, max_number),
               nrun = nrun,
               cores = cores,
+              optimize = refit,
               skip = TRUE
             )
           }
@@ -212,6 +219,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               output = file.path(result_dir, "SigProfiler_DBS"),
               range = 2:min(15, nrow(mat) - 1, max_number),
               nrun = nrun,
+              refit = refit,
               cores = cores,
               use_conda = TRUE
             )
@@ -230,6 +238,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               K0 = min(15, nrow(mat) - 1, max_number),
               nrun = nrun,
               cores = cores,
+              optimize = refit,
               skip = TRUE
             )
           }
@@ -246,6 +255,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               output = file.path(result_dir, "SigProfiler_ID"),
               range = 2:min(20, nrow(mat) - 1, max_number),
               nrun = nrun,
+              refit = refit,
               cores = cores,
               use_conda = TRUE
             )
@@ -264,6 +274,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               K0 = min(20, nrow(mat) - 1, max_number),
               nrun = nrun,
               cores = cores,
+              optimize = refit,
               skip = TRUE
             )
           }
@@ -386,7 +397,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           n_sig = manual_step,
           nrun = nrun,
           cores = cores,
-          optimize = TRUE,
+          optimize = refit,
           pConstant = 1e-9
         )
       } else {
@@ -410,7 +421,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               n_sig = manual_step,
               nrun = nrun,
               cores = cores,
-              optimize = TRUE,
+              optimize = refit,
               pConstant = 1e-9
             )
           }
@@ -427,7 +438,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               n_sig = manual_step,
               nrun = nrun,
               cores = cores,
-              optimize = TRUE,
+              optimize = refit,
               pConstant = 1e-9
             )
           }
@@ -444,7 +455,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               n_sig = manual_step,
               nrun = nrun,
               cores = cores,
-              optimize = TRUE,
+              optimize = refit,
               pConstant = 1e-9
             )
           }
@@ -745,6 +756,7 @@ if (ARGS$extract) {
           manual_step = manual_step, nrun = nrun, cores = cores,
           result_dir = result_dir,
           max_number = max_number,
+          refit = ARGS$refit,
           rm_hyper = ARGS$hyper,
           sigprofiler = ARGS$sigprofiler
         )
@@ -755,6 +767,7 @@ if (ARGS$extract) {
             manual_step = manual_step, nrun = nrun, cores = cores,
             result_dir = result_dir,
             max_number = max_number,
+            refit = ARGS$refit,
             rm_hyper = ARGS$hyper,
             sigprofiler = ARGS$sigprofiler
           )

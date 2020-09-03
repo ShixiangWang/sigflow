@@ -4,7 +4,7 @@
 ## Extraction PART:
 
 #1
-sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf -m MAF -r 10 -T 4 --max 10 --hyper
+sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf -m MAF -r 10 -T 4 --max 10 --refit --hyper
 if [ $? -ne 0 ]; then
     t1="failed at 'test_maf' in mode 'MAF'"
 else

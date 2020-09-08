@@ -1,6 +1,6 @@
 # Sigflow: Streamline Analysis Workflows for Mutational Signatures
 
-<img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/shixiangwang/sigminer.workflow"> <img alt="Docker Automated build" src="https://img.shields.io/docker/automated/shixiangwang/sigflow"> <img alt="Docker Image Version (latest by date)" src="https://img.shields.io/docker/v/shixiangwang/sigflow?color=blue"> <img alt="Docker Image Size (latest by date)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow"> <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/shixiangwang/sigflow">
+<img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/shixiangwang/sigflow"> <img alt="Docker Automated build" src="https://img.shields.io/docker/automated/shixiangwang/sigflow"> <img alt="Docker Image Version (latest by date)" src="https://img.shields.io/docker/v/shixiangwang/sigflow?color=blue"> <img alt="Docker Image Size (latest by date)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow"> <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/shixiangwang/sigflow">
 
 ```
        .__        _____.__                 
@@ -18,14 +18,21 @@ signature fitting.
 <details>
 <summary>Table of content</summary>
        
-- [Installation](#installation)
-- [Use Sigflow docker image](#use-sigflow-docker-image)
-- [Usage](#usage)
-- [Use cases](#use-cases)
-- [Updates](#updates)
-- [Test](#test)
-- [Citation](#citation)
-- [License](#license)
+- [Sigflow: Streamline Analysis Workflows for Mutational Signatures](#sigflow-streamline-analysis-workflows-for-mutational-signatures)
+  - [Installation](#installation)
+  - [Use Sigflow docker image](#use-sigflow-docker-image)
+  - [Usage](#usage)
+    - [Commands and options](#commands-and-options)
+    - [Input](#input)
+  - [Use cases](#use-cases)
+      - [`extract` command](#extract-command)
+      - [`fit` command](#fit-command)
+      - [`bt` command](#bt-command)
+      - [How to use Docker to run Sigflow](#how-to-use-docker-to-run-sigflow)
+  - [Updates](#updates)
+  - [Test](#test)
+  - [Citation](#citation)
+  - [License](#license)
 
 </details>
 
@@ -60,13 +67,13 @@ remotes::install_github("ShixiangWang/sigminer")
 3. Clone this repository, run
 
 ```bash
-$ git clone https://github.com/ShixiangWang/sigminer.workflow
+$ git clone https://github.com/ShixiangWang/sigflow
 ```
 
 4. Link the R script as a executable file (command)
 
 ```bash
-$ cd sigminer.workflow
+$ cd sigflow
 $ ln -s $PWD/sigflow.R /usr/bin/sigflow  # You can choose another place instead of /usr/bin/sigflow
 ```
 
@@ -196,7 +203,7 @@ For copy number segment data in in CSV (including TSV) or EXCEL format, the foll
 
 ## Use cases
 
-Example datasets along with many example code are available in clone repository above (you can read it online at [here](https://github.com/ShixiangWang/sigminer.workflow/tree/master/test)).
+Example datasets along with many example code are available in clone repository above (you can read it online at [here](https://github.com/ShixiangWang/sigflow/tree/master/test)).
 
 The following parts give an example for each command.
 
@@ -210,8 +217,8 @@ Result directory of any command has the following structure.
 
 ```sh
 $ # Assume you have done the clone step
-$ # git clone https://github.com/ShixiangWang/sigminer.workflow
-$ cd sigminer.workflow/test
+$ # git clone https://github.com/ShixiangWang/sigflow
+$ cd sigflow/test
 $ sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf -m MAF -r 10 -T 4 --max 10
 ```
 
@@ -223,8 +230,8 @@ This will auto-extract SBS/DBS/INDEL signatures from data `toga_laml.maf.gz` by 
 
 ```sh
 $ # Assume you have done the clone step
-$ # git clone https://github.com/ShixiangWang/sigminer.workflow
-$ cd sigminer.workflow/test
+$ # git clone https://github.com/ShixiangWang/sigflow
+$ cd sigflow/test
 $ sigflow fit -i tcga_laml.maf.gz -o test_results/test_fitting -m MAF
 ```
 
@@ -234,8 +241,8 @@ This will auto-fit input data `tcga_laml.maf.gz` to COSMIC SBS/DBS/INDEL signatu
 
 ```sh
 $ # Assume you have done the clone step
-$ # git clone https://github.com/ShixiangWang/sigminer.workflow
-$ cd sigminer.workflow/test
+$ # git clone https://github.com/ShixiangWang/sigflow
+$ cd sigflow/test
 $ sigflow bt -i tcga_laml.maf.gz -o test_results/test_bt -m SBS -r 5
 ```
 

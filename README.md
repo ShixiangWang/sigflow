@@ -15,8 +15,6 @@
 fit mutation data to COSMIC reference signatures (SBS/DBS/INDEL) and run bootstrapping analysis for
 signature fitting.
 
-Skip the following installation step if you would like to use [Docker](https://hub.docker.com/r/shixiangwang/sigflow).
-
 <details>
 <summary>Table of content</summary>
        
@@ -32,6 +30,10 @@ Skip the following installation step if you would like to use [Docker](https://h
 </details>
 
 ## Installation
+
+If you would like to use [Docker](https://hub.docker.com/r/shixiangwang/sigflow), skip the following installation step and go to PART ['Use Sigflow docker image'](#use-sigflow-docker-image) directly.
+
+> Using Sigflow Docker image is recommended for users without experiences in programming, especially in R.
 
 Requirements:
 

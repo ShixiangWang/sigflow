@@ -160,25 +160,23 @@ Sigflow supports input data in VCF/MAF/CSV/EXCEL format. The file format is auto
 
 For SBS/DBS/INDEL data in CSV (including TSV) or EXCEL format, the following columns typically described in MAF format are necessary:
 
-- 'Hugo_Symbol': gene symbol
-- 'Chromosome': chromosome name, e.g. "chr1"
-- 'Start_Position': start positionof the variant (1-based)
-- 'End_Position': end position of the variant (1-based) 
-- 'Reference_Allele': reference allele of the variant, e.g. "C"
-- 'Tumor_Seq_Allele2': tumor sequence allele, e.g. "T"
-- 'Variant_Classification': variant classification, e.g. "Missense_Mutation"
-- 'Variant_Type': variant type, e.g. "SNP"
-- 'Tumor_Sample_Barcode': sample identifier
+- `Hugo_Symbol`: gene symbol
+- `Chromosome`: chromosome name, e.g. "chr1"
+- `Start_Position`: start positionof the variant (1-based)
+- `End_Position`: end position of the variant (1-based) 
+- `Reference_Allele`: reference allele of the variant, e.g. "C"
+- `Tumor_Seq_Allele2`: tumor sequence allele, e.g. "T"
+- `Variant_Classification`: variant classification, e.g. "Missense_Mutation"
+- `Variant_Type`: variant type, e.g. "SNP"
+- `Tumor_Sample_Barcode`: sample identifier
 
 For copy number segment data in in CSV (including TSV) or EXCEL format, the following columns are necessary:
 
-- 'Chromosome': chromosome name, e.g. "chr1"
-- 'Start.bp': start breakpoint position of segment
-- 'End.bp': end breakpoint position of segment
-- 'modal_cn': integer copy number value
-- 'sample': sample identifier
-
-
+- `Chromosome`: chromosome name, e.g. "chr1"
+- `Start.bp`: start breakpoint position of segment
+- `End.bp`: end breakpoint position of segment
+- `modal_cn`: integer copy number value
+- `sample`: sample identifier
 
 ## Use cases
 
@@ -202,6 +200,8 @@ $ sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf -m MAF -r 10 -T 4
 ```
 
 This will auto-extract SBS/DBS/INDEL signatures from data `toga_laml.maf.gz` by 10 Bayesian NMF runs with 4 computer cores (4 threads) from signature number ranges from 1 to 10, output results to directory `test_results/test_maf`.
+
+> NOTE, in practice, set `-r` to a value  `>=10` is recommended for auto-extraction with Bayesian NMF, `>=100` for semi-automatic extraction and automatic extraction with SigProfiler (enabled by `--sigprofiler`).
 
 #### `fit` command
 
@@ -227,8 +227,6 @@ This will auto-fit the random resample of input mutation profile to COSMIC SBS/D
 
 > NOTE, in practice, set `-r` to a value  `>=100` is recommended.
 
- 
-
 #### How to use Docker to run Sigflow
 
 If you use Docker to run Sigflow, you cannot directly call `sigflow` command. Instead, you should use `sudo docker run --rm -v /your_local_path:/docker_path shixiangwang/sigflow` to start a Docker container.
@@ -236,7 +234,10 @@ If you use Docker to run Sigflow, you cannot directly call `sigflow` command. In
 For example, if you want to accomplish the same task shown in `extract` command above, you need to run:
 
 ```sh
-$ sudo docker run --rm -v /your_local_path:/docker_path shixiangwang/sigflow extract -i /docker_path/tcga_laml.maf.gz -o /docker_path/test_maf -m MAF -r 10 -T 4 --max 10
+$ sudo docker run --rm -v /your_local_path:/docker_path shixiangwang/sigflow \
+  extract -i /docker_path/tcga_laml.maf.gz \
+          -o /docker_path/test_maf \
+          -m MAF -r 10 -T 4 --max 10
 ```
 
 Here,

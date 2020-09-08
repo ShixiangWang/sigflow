@@ -9,7 +9,7 @@ Copyright: AFL@2020 [https://opensource.org/licenses/AFL-3.0]
 Desc:
   There are several subcommands.
   ==
-  extract - extract signatures by either automated or manual way.
+  extract - extract signatures by either automatic or semi-automatic way.
             Of note, when you use manual way, you need to run 2 times, 
             firstly you should set --manual to get signature estimation results,
             and secondly you should set --manual --number N to get N signatures.
@@ -40,7 +40,7 @@ Options:
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
   --refit                         refit the denovo signatures with quadratic programming or nnls.
   --hyper                         enable hyper mutation handling in COSMIC signatures (not used by SigProfiler approach).
-  --sigprofiler                   enable auto-extraction by SigProfiler software.
+  --sigprofiler                   enable automatic extraction by SigProfiler software.
   -v, --verbose                   print verbose message.
 
 =================================================================

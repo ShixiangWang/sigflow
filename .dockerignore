@@ -1,5 +1,5 @@
 .gitignore
 README.md
-sigminer.workflow.Rproj
+sigflow.Rproj
 docker_build.sh
 test/test_docker.sh

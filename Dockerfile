@@ -6,7 +6,7 @@ LABEL \
     email="wangshx@shanghaitech.edu.cn" \
     description="Docker Image for Sigflow" \
     org.label-schema.license="Academic Free License v.3.0" \
-    org.label-schema.vcs-url="https://github.com/ShixiangWang/sigminer.workflow/" \
+    org.label-schema.vcs-url="https://github.com/ShixiangWang/sigflow/" \
     org.label-schema.vendor="XSLiu Lab Project"
 
 ## Install system dependencies

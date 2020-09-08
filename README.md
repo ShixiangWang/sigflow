@@ -294,4 +294,4 @@ bioRxiv 2020.08.12.247528; doi: https://doi.org/10.1101/2020.08.12.247528
 
 This software is released under [Academic Free License ("AFL") v.3.0](https://opensource.org/licenses/AFL-3.0)
 
-Copyright 2020 © Shixiang Wang
+Copyright 2020 © Shixiang Wang, Xue-Song Liu

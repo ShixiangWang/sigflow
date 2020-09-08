@@ -19,9 +19,7 @@ Skip the following installation step if you would like to use [Docker](https://h
 
 <details>
 <summary>Table of content</summary>
-
-## Table of content
-
+       
 - [Installation](#installation)
 - [Use Sigflow docker image](#use-sigflow-docker-image)
 - [Usage](#usage)

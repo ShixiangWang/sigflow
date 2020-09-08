@@ -17,6 +17,22 @@ signature fitting.
 
 Skip the following installation step if you would like to use [Docker](https://hub.docker.com/r/shixiangwang/sigflow).
 
+<details>
+<summary>Table of content</summary>
+
+## Table of content
+
+- [Installation](#installation)
+- [Use Sigflow docker image](#use-sigflow-docker-image)
+- [Usage](#usage)
+- [Use cases](#use-cases)
+- [Updates](#updates)
+- [Test](#test)
+- [Citation](#citation)
+- [License](#license)
+
+</details>
+
 ## Installation
 
 Requirements:

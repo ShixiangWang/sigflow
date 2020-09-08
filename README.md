@@ -101,22 +101,11 @@ If you want to go into the docker terminal, run
 $ docker run --rm --entrypoint /bin/bash -it shixiangwang/sigflow
 ```
 
-## Updates
-
-- 2020-09-03: 
-  - Use sigminer v1.0.15 and support inputing reference signature index in `fit` and `bt` commands.
-  - Allow users to decide if refit the signature exposures after *de novo* extraction with `refit` option.
-  - Support matrix as input.
-- 2020-08-14: Use sigminer v1.0.11 to use SigProfilerExtractor v1.0.15 to avoid issue raised from SigProfilerExtractor updates.
-- 2020-08-05: **Release Sigflow 1.0** and related Docker image. This version is based on Sigminer v1.0.10, R v4.0.2 and SigProfilerExtractor v.1.0.15.
-  - Supported SigProfiler.
-  - Added `verbose` option.
-  - Added `max` option.
-  - Added `hyper` option.
-  - More flexible and reasonable configuration.
-- 2020-07-29: **Release Sigflow 0.1** using Docker. Sigflow 0.1 is based on Sigminer v1.0.9 and R v4.0.2
-
 ## Usage
+
+### Commands and options
+
+All Sigflow commands and options are described as the following.
 
 ```
 =================================================================
@@ -164,6 +153,114 @@ Options:
 
 =================================================================
 ```
+
+### Input
+
+Sigflow supports input data in VCF/MAF/CSV/EXCEL format. The file format is auto-detected by Sigflow.
+
+For SBS/DBS/INDEL data in CSV (including TSV) or EXCEL format, the following columns typically described in MAF format are necessary:
+
+- 'Hugo_Symbol': gene symbol
+- 'Chromosome': chromosome name, e.g. "chr1"
+- 'Start_Position': start positionof the variant (1-based)
+- 'End_Position': end position of the variant (1-based) 
+- 'Reference_Allele': reference allele of the variant, e.g. "C"
+- 'Tumor_Seq_Allele2': tumor sequence allele, e.g. "T"
+- 'Variant_Classification': variant classification, e.g. "Missense_Mutation"
+- 'Variant_Type': variant type, e.g. "SNP"
+- 'Tumor_Sample_Barcode': sample identifier
+
+For copy number segment data in in CSV (including TSV) or EXCEL format, the following columns are necessary:
+
+- 'Chromosome': chromosome name, e.g. "chr1"
+- 'Start.bp': start breakpoint position of segment
+- 'End.bp': end breakpoint position of segment
+- 'modal_cn': integer copy number value
+- 'sample': sample identifier
+
+
+
+## Use cases
+
+Example datasets along with many example code are available in clone repository above (you can read it online at [here](https://github.com/ShixiangWang/sigminer.workflow/tree/master/test)).
+
+The following parts give an example for each command.
+
+Result directory of any command has the following structure.
+
+- Files with extension`.RData` and `.rds`  are R related files to reproduce the results, and can be imported into R for further analysis and visualization.
+- Files with extension`.pdf` are common visualization results used for communication.
+- Files with extension `.csv` are formated data tables used for inspection, communication or further analysis.
+
+#### `extract` command
+
+```sh
+$ # Assume you have done the clone step
+$ # git clone https://github.com/ShixiangWang/sigminer.workflow
+$ cd sigminer.workflow/test
+$ sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf -m MAF -r 10 -T 4 --max 10
+```
+
+This will auto-extract SBS/DBS/INDEL signatures from data `toga_laml.maf.gz` by 10 Bayesian NMF runs with 4 computer cores (4 threads) from signature number ranges from 1 to 10, output results to directory `test_results/test_maf`.
+
+#### `fit` command
+
+```sh
+$ # Assume you have done the clone step
+$ # git clone https://github.com/ShixiangWang/sigminer.workflow
+$ cd sigminer.workflow/test
+$ sigflow fit -i tcga_laml.maf.gz -o test_results/test_fitting -m MAF
+```
+
+This will auto-fit input data `tcga_laml.maf.gz` to COSMIC SBS/DBS/INDEL signatures. Signature exposure data tables and plots are outputed.
+
+#### `bt` command
+
+```sh
+$ # Assume you have done the clone step
+$ # git clone https://github.com/ShixiangWang/sigminer.workflow
+$ cd sigminer.workflow/test
+$ sigflow bt -i tcga_laml.maf.gz -o test_results/test_bt -m SBS -r 5
+```
+
+This will auto-fit the random resample of input mutation profile to COSMIC SBS/DBS/INDEL signatures for specified times (here is 5). Data tables and plots of bootstrap signature exposures, errors and p values under different exposure cutoff are outputed.
+
+> NOTE, in practice, set `-r` to a value  `>=100` is recommended.
+
+ 
+
+#### How to use Docker to run Sigflow
+
+If you use Docker to run Sigflow, you cannot directly call `sigflow` command. Instead, you should use `sudo docker run --rm -v /your_local_path:/docker_path shixiangwang/sigflow` to start a Docker container.
+
+For example, if you want to accomplish the same task shown in `extract` command above, you need to run:
+
+```sh
+$ sudo docker run --rm -v /your_local_path:/docker_path shixiangwang/sigflow extract -i /docker_path/tcga_laml.maf.gz -o /docker_path/test_maf -m MAF -r 10 -T 4 --max 10
+```
+
+Here,
+
+- `--rm` will delete this container when this task is finished.
+
+- `-v` is used for mounting your local directory `/your_local_path` as `/docker_path` in Docker image. **This is important**. You need to use the Docker container path in Sigflow arguments. So there must be a file called `/your_local_path/tcga_laml.maf.gz` exists in your computer, it will be treated as `/docker_path/test_maf` in the container.
+
+## Updates
+
+- 2020-09-03: 
+  - Use sigminer v1.0.15 and support inputing reference signature index in `fit` and `bt` commands.
+  - Allow users to decide if refit the signature exposures after *de novo* extraction with `refit` option.
+  - Support matrix as input.
+- 2020-08-14: Use sigminer v1.0.11 to use SigProfilerExtractor v1.0.15 to avoid issue raised from SigProfilerExtractor updates.
+- 2020-08-05: **Release Sigflow 1.0** and related Docker image. This version is based on Sigminer v1.0.10, R v4.0.2 and SigProfilerExtractor v.1.0.15.
+  - Supported SigProfiler.
+  - Added `verbose` option.
+  - Added `max` option.
+  - Added `hyper` option.
+  - More flexible and reasonable configuration.
+- 2020-07-29: **Release Sigflow 0.1** using Docker. Sigflow 0.1 is based on Sigminer v1.0.9 and R v4.0.2
+
+
 
 ## Test
 

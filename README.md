@@ -13,11 +13,13 @@
 
 **Sigflow** provides useful mutational signature analysis workflows based on R package [sigminer](https://github.com/ShixiangWang/sigminer). It can auto-extract mutational signatures,
 fit mutation data to COSMIC reference signatures (SBS/DBS/INDEL) and run bootstrapping analysis for
-signature fitting.
+signature fitting. For interactive analysis and visualization, please refer to its co-evolutionary R package [sigminer](https://github.com/ShixiangWang/sigminer).
+
+> Any bugs or suggestions please report to [GitHub issues](https://github.com/ShixiangWang/sigflow/issues), I will respond as soon as possible.
 
 <details>
 <summary>Table of content</summary>
-       
+
 - [Sigflow: Streamline Analysis Workflows for Mutational Signatures](#sigflow-streamline-analysis-workflows-for-mutational-signatures)
   - [Installation](#installation)
   - [Use Sigflow docker image](#use-sigflow-docker-image)
@@ -222,9 +224,67 @@ $ cd sigflow/test
 $ sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf -m MAF -r 10 -T 4 --max 10
 ```
 
-This will auto-extract SBS/DBS/INDEL signatures from data `toga_laml.maf.gz` by 10 Bayesian NMF runs with 4 computer cores (4 threads) from signature number ranges from 1 to 10, output results to directory `test_results/test_maf`.
+This will auto-extract SBS/DBS/INDEL signatures from data `toga_laml.maf.gz` (a gzipped MAF file from [Maftools](https://github.com/PoisonAlien/maftools)) by 10 Bayesian NMF runs with 4 computer threads and output results to directory `test_results/test_maf`. At default, **Bayesian NMF** approach is used, it starts from 10 signatures (set by `--max`) and reduces to a optimal signature number. If `--sigprofiler` is enabled, i.e.
 
-> NOTE, in practice, set `-r` to a value  `>=10` is recommended for auto-extraction with Bayesian NMF, `>=100` for semi-automatic extraction and automatic extraction with SigProfiler (enabled by `--sigprofiler`).
+```sh
+$ sigflow extract -i tcga_laml.maf.gz -o test_results/test_maf -m MAF -r 10 -T 4 --max 10 --sigprofiler
+```
+
+Sigflow will use the [SigProfiler](https://github.com/AlexandrovLab/SigProfilerExtractor) to auto-extract signatures, here it will extract 2 to 10 signatures and determine the optimal solution.
+
+> NOTE, **in practice, set `-r` to a value  `>=10` is recommended** for auto-extraction with Bayesian NMF, `>=100` for semi-automatic extraction with basic NMF and automatic extraction with SigProfiler (enabled by `--sigprofiler`).
+
+Results of `extract` command have the following structure:
+
+![](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909141307.png)
+
+> Here, no DBS records found in input data, so no corresponding result files exist.
+
+- Tally: mutation catalogue data and plots of all samples or individual samples are stored in files/directory contains `tally`.
+
+  ![](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909144059.png)
+
+  ![](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909143533.png)
+
+  ![](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909143624.png)
+
+- Signature: signature profile (relative contribution in each signature) data and plots of all samples are stored in files contains `signature`.
+
+  ![](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909144133.png)
+
+  ![](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909143815.png)
+
+  ![](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909143950.png)
+
+- Exposure: exposure profile (relative and absolute contribution of each signature to each sample) data and plots of all samples are stored in files contains `exposure`.
+
+  ![](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909144214.png)
+
+  ![](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909144310.png)
+
+  ![](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909144402.png)
+
+- Similarity: to understand the etiologies of extracted signatures, cosine similarity analysis is applied to extracted signatures and reference signatures from COSMIC database. The result files contains `similarity` and `best_match`.
+
+  ![image-20200909144940222](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909144940.png)
+
+  ![image-20200909145001347](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909145001.png)
+
+  ![image-20200909145039312](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909145039.png)
+
+  ![image-20200909145114261](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909145114.png)
+
+  ![image-20200909145214337](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909145214.png)
+
+- Clustering: the samples can be clustered based on signature relative exposure. This analysis is done by kmeans and the results are outputed (Note, the cluster number is same as signature number).
+
+  ![image-20200909145522952](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909145523.png)
+
+  ![image-20200909145546261](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909145546.png)
+
+  ![image-20200909145649068](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909145649.png)
+
+  
 
 #### `fit` command
 
@@ -237,7 +297,47 @@ $ sigflow fit -i tcga_laml.maf.gz -o test_results/test_fitting -m MAF
 
 This will auto-fit input data `tcga_laml.maf.gz` to COSMIC SBS/DBS/INDEL signatures. Signature exposure data tables and plots are outputed.
 
+Results of `fit` command have the following structure:
+
+![image-20200909150037803](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909150037.png)
+
+> Here, no DBS records found in input data, so no corresponding result files exist.
+>
+> `legacy` represents COSMIC v2 SBS signatures and `SBS` represents COSMIC v3 SBS signatures.
+
+- Tally: same as results from `extract` command.
+
+- Fitting: fitted relative/absolute signature exposure, reconstructed error (calculated by Frobenius norm) data and corresponding plots of all samples are stored in files contains `fitting`.
+
+  ![image-20200909150444291](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909150444.png)
+
+  ![image-20200909151002018](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909151002.png)
+
+  > Relative signature exposure in each sample.
+
+  ![image-20200909150607896](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909150608.png)
+
+  > Absolute signature exposure in each sample.
+
+  ![image-20200909150902466](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909150902.png)
+
+  > Visualization of relative signature exposure.
+
+  ![image-20200909150743352](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909150743.png)
+
+  > Visualization of absolute signature exposure.
+
+  
+
+  ![image-20200909150646872](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909150646.png)
+
+  > Reconstructed error for each sample.
+
+  
+
 #### `bt` command
+
+> The principle of using bootstrapping analysis for estimating signature exposure instability comes from paper [Detecting presence of mutational signatures in cancer with confidence](https://academic.oup.com/bioinformatics/article/34/2/330/4209996).
 
 ```sh
 $ # Assume you have done the clone step
@@ -246,9 +346,43 @@ $ cd sigflow/test
 $ sigflow bt -i tcga_laml.maf.gz -o test_results/test_bt -m SBS -r 5
 ```
 
-This will auto-fit the random resample of input mutation profile to COSMIC SBS/DBS/INDEL signatures for specified times (here is 5). Data tables and plots of bootstrap signature exposures, errors and p values under different exposure cutoff are outputed.
+This will  resample mutation catalogue of each sample based on observed mutation type frequency and run signature fitting using COSMIC SBS/DBS/INDEL signatures. The process is repeated multiple times and controlled by option `-r` (here is 5). This bootstrap analysis is used to estimate the instability of signature exposure. Data tables and plots of bootstrap signature exposures, errors and p values under different exposure cutoff are outputed.
 
 > NOTE, in practice, set `-r` to a value  `>=100` is recommended.
+
+Results of `bt` command have the following structure:
+
+![image-20200909152336875](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909152337.png)
+
+- Tally: same as results from `extract` command.
+
+- Bootstrap fitting: fitted relative/absolute signature exposure, reconstructed error (calculated by Frobenius norm of residue), signature instability data and corresponding plots of all bootstrapping samples and individual samples are stored in files/directory contains `bootstrap`.
+
+  ![image-20200909153710051](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909153710.png)
+
+  ![image-20200909153800225](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909153800.png)
+
+  > Bootstrap signature exposure distribution.
+
+  ![image-20200909154812780](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909154812.png)
+
+  > For each sample, the distribution of bootstrap exposures is plotted as boxplot and the fitting result with original input data is labelled by triangle. 
+
+  ![image-20200909154022111](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909154022.png)
+
+  > Note, the sample data without bootstrapping process are also fitted and labelled as `type = "optimal"`
+
+  ![image-20200909153952230](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909153952.png)
+
+  ![image-20200909154325658](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909154325.png)
+
+  > The p values are calculated as the proportion of how many bootstrapping samples have exposures under specified exposure cutoff.
+
+  ![image-20200909154555142](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200909154555.png)
+
+  > Signature exposure instability is measured as MRSE between exposures in bootstrap samples and exposures in the original samples for each tumor/patient.
+
+  
 
 #### How to use Docker to run Sigflow
 
@@ -266,11 +400,12 @@ $ sudo docker run --rm -v /your_local_path:/docker_path shixiangwang/sigflow \
 Here,
 
 - `--rm` will delete this container when this task is finished.
-
 - `-v` is used for mounting your local directory `/your_local_path` as `/docker_path` in Docker image. **This is important**. You need to use the Docker container path in Sigflow arguments. So there must be a file called `/your_local_path/tcga_laml.maf.gz` exists in your computer, it will be treated as `/docker_path/test_maf` in the container.
 
 ## Updates
 
+- 2020-09-09:
+  - Update README and documentation of input and usage.
 - 2020-09-03: 
   - Use sigminer v1.0.15 and support inputing reference signature index in `fit` and `bt` commands.
   - Allow users to decide if refit the signature exposures after *de novo* extraction with `refit` option.

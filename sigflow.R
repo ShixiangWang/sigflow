@@ -17,6 +17,8 @@ Desc:
   fit     - fit signatures in >=1 samples based on COSMIC reference signatures.
   ==
   bt      - run bootstrap signature fitting analysis in >=1 samples.
+  ==
+  show    - show some useful information.
 
 Usage:
   sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--refit] [--hyper] [--verbose]

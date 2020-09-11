@@ -11,9 +11,9 @@
      \/  /_____/  
 ```
 
-**Sigflow** provides useful mutational signature analysis workflows based on R package [sigminer](https://github.com/ShixiangWang/sigminer). It can auto-extract mutational signatures,
+**Sigflow** provides useful mutational signature analysis workflows. It can auto-extract mutational signatures,
 fit mutation data to COSMIC reference signatures (SBS/DBS/INDEL) and run bootstrapping analysis for
-signature fitting. For interactive analysis and visualization, please refer to its co-evolutionary R package [sigminer](https://github.com/ShixiangWang/sigminer).
+signature fitting. 
 
 > Any bugs or suggestions please report to [GitHub issues](https://github.com/ShixiangWang/sigflow/issues), I will respond as soon as possible.
 
@@ -33,6 +33,7 @@ signature fitting. For interactive analysis and visualization, please refer to i
       - [How to use Docker to run Sigflow](#how-to-use-docker-to-run-sigflow)
   - [Updates](#updates)
   - [Test](#test)
+  - [Other tools](#other-tools)
   - [Citation](#citation)
   - [License](#license)
 
@@ -425,6 +426,11 @@ Here,
 
 There are some example data sets in this repository, you can find how to test different workflows in [test/test.sh](test/test.sh).
 It is time consuming to run all tests, just pick an example test similar to your task and see how it works. Before releasing a new version of **Sigflow**, I would run all tests to make sure they work well.
+
+## Other tools
+
+- For interactive analysis and visualization, please refer to its co-evolutionary R package [sigminer](https://github.com/ShixiangWang/sigminer).
+- For mutation analysis, please refer to [Maftools](https://github.com/PoisonAlien/maftools).
 
 ## Citation
 

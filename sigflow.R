@@ -98,7 +98,7 @@ message("------\n")
 ## Program to go
 
 flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, result_dir,
-                            max_number = 100, 
+                            max_number = 100,
                             refit = TRUE,
                             rm_hyper = FALSE, sigprofiler = FALSE) {
   if (!dir.exists(file.path(result_dir, "results"))) {
@@ -130,14 +130,15 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
       if (!is.matrix(obj)) {
         tally_list <- sig_tally(obj, mode = "ALL", ref_genome = ref_genome)
       } else {
-       ## Construct a fake tally result
-       ## In this situation, mode cannot be ALL
-       mm <- switch(mode,
-                    SBS = "SBS_96",
-                    DBS = "DBS_78",
-                    ID = "ID_83")
-       tally_list <- list()
-       tally_list[[mm]] <- obj %>% t()
+        ## Construct a fake tally result
+        ## In this situation, mode cannot be ALL
+        mm <- switch(mode,
+          SBS = "SBS_96",
+          DBS = "DBS_78",
+          ID = "ID_83"
+        )
+        tally_list <- list()
+        tally_list[[mm]] <- obj %>% t()
       }
       save(tally_list, file = file.path(result_dir, "maf_tally.RData"))
       if (!is.null(tally_list$SBS_96) & mode %in% c("SBS", "ALL")) {

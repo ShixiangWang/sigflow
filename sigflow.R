@@ -18,12 +18,13 @@ Desc:
   ==
   bt      - run bootstrap signature fitting analysis in >=1 samples.
   ==
-  show    - show some useful information.
+  show    - show some useful information or plots. See README for details.
 
 Usage:
   sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--refit] [--hyper] [--verbose]
   sigflow fit --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--verbose]
   sigflow bt  --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
+  sigflow show [--isearch=<keyword>] [--index=<index> --mode=<class>] [--output=<outdir>] [--verbose]
   sigflow (-h | --help)
   sigflow --version
 
@@ -43,6 +44,7 @@ Options:
   --refit                         refit the de-novo signatures with quadratic programming or nnls (SigProfiler).
   --hyper                         enable hyper mutation handling in COSMIC signatures (not used by SigProfiler approach).
   --sigprofiler                   enable automatic extraction by SigProfiler software.
+  --isearch <keyword>             search and how cancer type specific reference signature index by keyword, e.g. breast.
   -v, --verbose                   print verbose message.
 
 =================================================================
@@ -74,25 +76,26 @@ Name   :       sigflow
 Author :       Shixiang Wang
 Version:       1.1
 License:       AFL 3.0
-Link   :       https://github.com/ShixiangWang/sigminer.workflow
-Doc    :       https://shixiangwang.github.io/sigminer-doc/
+Link   :       https://github.com/ShixiangWang/sigflow
+Doc    :       https://github.com/ShixiangWang/sigflow
 ============================== START
 ")
 
 
 # Parsing input -----------------------------------------------------------
 
-message("Parsing parameters...\n------")
 ARGS <- arguments[!startsWith(names(arguments), "--")]
-for (i in seq_along(ARGS)) {
-  if (names(ARGS)[i] %in% "sigprofiler") {
-    message(names(ARGS)[i], "\t: ", ARGS[i])
-  } else {
-    message(names(ARGS)[i], "\t\t: ", ARGS[i])
+if (!is.null(ARGS$input) | ARGS$verbose) {
+  message("Parsing parameters...\n------")
+  for (i in seq_along(ARGS)) {
+    if (names(ARGS)[i] %in% "sigprofiler") {
+      message(names(ARGS)[i], "\t: ", ARGS[i])
+    } else {
+      message(names(ARGS)[i], "\t\t: ", ARGS[i])
+    }
   }
+  message("------\n")
 }
-
-message("------\n")
 
 # Function part -----------------------------------------------------------
 ## Program to go
@@ -722,64 +725,100 @@ if (ARGS$verbose) {
   print(utils::sessionInfo())
 }
 
-message("Reading file...\n------")
+if (!is.null(ARGS$input)) message("Reading file...\n------")
 
 mode <- ARGS$mode
 input <- ARGS$input
 genome_build <- ARGS$genome
 result_dir <- path.expand(ARGS$output)
 
-if (any(endsWith(input, c("xls", "xlsx")))) {
-  if (!suppressMessages(require("readxl"))) {
-    message("readxl not found, try installing.")
-    install.packages("readxl")
-    library("readxl")
+if (!is.null(ARGS$input) | ARGS$verbose) { 
+  if (!dir.exists(result_dir)) {
+    dir.create(result_dir, recursive = TRUE)
+    message("Result directory ", result_dir, " created.")
+  } else {
+    message("Result directory ", result_dir, " existed.")
   }
-  input <- readxl::read_excel(input)
 }
 
 
-if (mode == "CN") {
-  isCN <- TRUE
-} else {
-  isCN <- FALSE
-}
-
-if (!dir.exists(result_dir)) {
-  dir.create(result_dir, recursive = TRUE)
-  message("Result directory ", result_dir, " created.")
-} else {
-  message("Result directory ", result_dir, " existed.")
-}
-
-if (!isCN) {
-  if (!file.exists(file.path(result_dir, "maf_obj.RData"))) {
-    if (dir.exists(input)) {
-      fs <- list.files(input, pattern = "*.vcf", full.names = TRUE)
-      if (length(fs) < 1) {
-        message("When input is a directory, it should contain VCF files!")
-        quit("no", status = -1)
+if (!is.null(input)) {
+  
+  if (any(endsWith(input, c("xls", "xlsx")))) {
+    if (!suppressMessages(require("readxl"))) {
+      message("readxl not found, try installing.")
+      install.packages("readxl")
+      library("readxl")
+    }
+    input <- readxl::read_excel(input)
+  }
+  
+  if (mode == "CN") {
+    isCN <- TRUE
+  } else {
+    isCN <- FALSE
+  }
+  
+  if (!isCN) {
+    if (!file.exists(file.path(result_dir, "maf_obj.RData"))) {
+      if (dir.exists(input)) {
+        fs <- list.files(input, pattern = "*.vcf", full.names = TRUE)
+        if (length(fs) < 1) {
+          message("When input is a directory, it should contain VCF files!")
+          quit("no", status = -1)
+        }
+        message("Try parsing VCF files...")
+        obj <- sigminer::read_vcf(fs, genome_build = genome_build, keep_only_pass = FALSE, verbose = TRUE)
+      } else {
+        message("Try reading as a MAF file.")
+        if (!is.data.frame(input)) {
+          obj <- suppressMessages(data.table::fread(input, header = TRUE, data.table = FALSE))
+        } else {
+          obj <- input
+        }
+        if (!"Tumor_Sample_Barcode" %in% colnames(obj)) {
+          message("No 'Tumor_Sample_Barcode' column detected, try parsing as a component-by-sample matrix.")
+          rownames(obj) <- obj[[1]]
+          obj[[1]] <- NULL
+          obj <- as.matrix(obj)
+          message("Read as a matrix done.")
+        } else {
+          obj <- tryCatch(
+            sigminer::read_maf(obj, verbose = TRUE),
+            error = function(e) {
+              message("Read input as a MAF file failed, try parsing as a component-by-sample matrix.")
+              rownames(obj) <- obj[[1]]
+              obj[[1]] <- NULL
+              obj <- as.matrix(obj)
+              message("Read as a matrix done.")
+              return(obj)
+            }
+          )
+        }
       }
-      message("Try parsing VCF files...")
-      obj <- sigminer::read_vcf(fs, genome_build = genome_build, keep_only_pass = FALSE, verbose = TRUE)
+      save(obj, file = file.path(result_dir, "maf_obj.RData"))
     } else {
-      message("Try reading as a MAF file.")
+      load(file = file.path(result_dir, "maf_obj.RData"))
+    }
+  } else {
+    if (!file.exists(file.path(result_dir, "cn_obj.RData"))) {
+      message("Try reading as a Segment file.")
       if (!is.data.frame(input)) {
         obj <- suppressMessages(data.table::fread(input, header = TRUE, data.table = FALSE))
       } else {
         obj <- input
       }
-      if (!"Tumor_Sample_Barcode" %in% colnames(obj)) {
-        message("No 'Tumor_Sample_Barcode' column detected, try parsing as a component-by-sample matrix.")
+      if (!"sample" %in% colnames(obj)) {
+        message("No 'sample' column detected, try parsing as a component-by-sample matrix.")
         rownames(obj) <- obj[[1]]
         obj[[1]] <- NULL
         obj <- as.matrix(obj)
         message("Read as a matrix done.")
       } else {
         obj <- tryCatch(
-          sigminer::read_maf(obj, verbose = TRUE),
+          sigminer::read_copynumber(obj, genome_build = genome_build, verbose = TRUE),
           error = function(e) {
-            message("Read input as a MAF file failed, try parsing as a component-by-sample matrix.")
+            message("Read input as a Segment file failed, try parsing as a component-by-sample matrix.")
             rownames(obj) <- obj[[1]]
             obj[[1]] <- NULL
             obj <- as.matrix(obj)
@@ -788,45 +827,14 @@ if (!isCN) {
           }
         )
       }
-    }
-    save(obj, file = file.path(result_dir, "maf_obj.RData"))
-  } else {
-    load(file = file.path(result_dir, "maf_obj.RData"))
-  }
-} else {
-  if (!file.exists(file.path(result_dir, "cn_obj.RData"))) {
-    message("Try reading as a Segment file.")
-    if (!is.data.frame(input)) {
-      obj <- suppressMessages(data.table::fread(input, header = TRUE, data.table = FALSE))
+      save(obj, file = file.path(result_dir, "cn_obj.RData"))
     } else {
-      obj <- input
+      load(file = file.path(result_dir, "cn_obj.RData"))
     }
-    if (!"sample" %in% colnames(obj)) {
-      message("No 'sample' column detected, try parsing as a component-by-sample matrix.")
-      rownames(obj) <- obj[[1]]
-      obj[[1]] <- NULL
-      obj <- as.matrix(obj)
-      message("Read as a matrix done.")
-    } else {
-      obj <- tryCatch(
-        sigminer::read_copynumber(obj, genome_build = genome_build, verbose = TRUE),
-        error = function(e) {
-          message("Read input as a Segment file failed, try parsing as a component-by-sample matrix.")
-          rownames(obj) <- obj[[1]]
-          obj[[1]] <- NULL
-          obj <- as.matrix(obj)
-          message("Read as a matrix done.")
-          return(obj)
-        }
-      )
-    }
-    save(obj, file = file.path(result_dir, "cn_obj.RData"))
-  } else {
-    load(file = file.path(result_dir, "cn_obj.RData"))
   }
 }
 
-message("------\n")
+if (!is.null(ARGS$input)) message("------\n")
 
 if (ARGS$extract) {
   message("Running signature extraction pipeline...\n------")
@@ -923,12 +931,23 @@ if (ARGS$extract) {
       quit("no", -1)
     }
   )
+} else if (ARGS$show) {
+  message("Running Sigflow 'show' subcommand...\n------")
+  
+  if (!is.null(ARGS$isearch)) {
+    message("Searching cancer-type specific indices with keyword: ", ARGS$isearch)
+    message("===")
+    sigminer::get_sig_cancer_type_index(keyword = ARGS$isearch)
+    message("\nFor online search, please go to:\n\thttps://shixiangwang.github.io/sigminer-doc/sigflow.html#cancer-type-specific-signature-index-database")
+    message("===")
+  } 
+  
 }
 
 # End part ----------------------------------------------------------------
 
 message("
-Please check the output directory.
+If there are output files for your command. Please check the output directory.
 Thanks for using Sigflow!
 ============================== END
 ")

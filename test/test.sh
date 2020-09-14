@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#ln -s ~/Documents/GitHub/sigminer.wrapper/sigflow.R ~/.local/bin/sigflow
+#ln -s ~/Documents/GitHub/sigflow/sigflow.R ~/.local/bin/sigflow
 
 ## Extraction PART:
 

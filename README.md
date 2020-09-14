@@ -12,8 +12,8 @@
 ```
 
 **Sigflow** provides useful mutational signature analysis workflows. It can auto-extract mutational signatures,
-fit mutation data to COSMIC reference signatures (SBS/DBS/INDEL) and run bootstrapping analysis for
-signature fitting. 
+fit mutation data to all/specified COSMIC reference signatures (SBS/DBS/INDEL) and run bootstrapping analysis for
+studying signature stability. 
 
 > Any bugs or suggestions please report to [GitHub issues](https://github.com/ShixiangWang/sigflow/issues), I will respond as soon as possible.
 
@@ -64,7 +64,7 @@ BiocManager::install("sigminer", dependencies = TRUE)
 install.packages("remotes")
 remotes::install_github("ShixiangWang/sigminer")
 # Install specific version by
-# remotes::install_github("ShixiangWang/sigminer@v1.0.10")
+# remotes::install_github("ShixiangWang/sigminer@v1.0.17")
 ```
 
 3. Clone this repository, run
@@ -94,7 +94,7 @@ Use specified version (recommended way):
 
 ```bash
 # docker pull shixiangwang/sigflow:version, e.g.
-$ docker pull shixiangwang/sigflow:0.1
+$ docker pull shixiangwang/sigflow:1.0
 ```
 
 > NOTE: Sigflow version has no prefix `v`.
@@ -103,6 +103,7 @@ Current available tag versions:
 
 - <img alt="Docker Image Version (tag latest semver)" src="https://img.shields.io/docker/v/shixiangwang/sigflow/0.1?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/0.1"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/0.1">
 - <img alt="Docker Image Version (tag latest semver)" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.0?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/1.0"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.0">
+- <img alt="Docker Image Version (tag latest semver)" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.1?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/1.1"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.1">
 
 Use latest version:
 
@@ -111,7 +112,7 @@ $ docker pull shixiangwang/sigflow:latest
 ```
 
 > The latest version uses the latest commit from GitHub, so it may have not been
-> prepared or tested. **So, be careful!**
+> prepared or fully tested. **So, be careful!**
 
 Run the docker by:
 
@@ -121,7 +122,7 @@ $ docker run shixiangwang/sigflow
 
 See [test/test_docker.sh](test/test_docker.sh) for examples.
 
-If you want to go into the docker terminal, run
+If you want to go into the docker container terminal, run
 
 ```bash
 $ docker run --rm --entrypoint /bin/bash -it shixiangwang/sigflow
@@ -409,6 +410,7 @@ Here,
 
 ## Updates
 
+- 2020-09-15: Prepare and try to release **Sigflow 1.1**. This is a version with its co-evolutionary R package Sigminer v1.0.17 and gold-standard de-novo signature extraction tool SigProfilerExtractor v1.0.17 as backends.
 - 2020-09-14:
   - Add new command `show` to search cancer type specific reference signature indices and plot COSMIC signatures.
   - Support `--refit` in SigProfiler calling.

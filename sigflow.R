@@ -40,7 +40,7 @@ Options:
   -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
   -r <runs>, --nrun <runs>        run times of NMF (extract) or bootstrapping (bt) to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
-  --refit                         refit the denovo signatures with quadratic programming or nnls.
+  --refit                         refit the de-novo signatures with quadratic programming or nnls (SigProfiler).
   --hyper                         enable hyper mutation handling in COSMIC signatures (not used by SigProfiler approach).
   --sigprofiler                   enable automatic extraction by SigProfiler software.
   -v, --verbose                   print verbose message.
@@ -177,7 +177,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           cores = cores,
           use_conda = TRUE
         )
-        sigs_CN <- sigprofiler_import(file.path(result_dir, "SigProfiler_CN"))
+        sigs_CN <- sigprofiler_import(file.path(result_dir, "SigProfiler_CN"), type = if (refit) "refit" else "suggest")
         data.table::fwrite(sigs_CN$all_stats, file = file.path(result_dir, "results", "SigProfiler_CN_stats.csv"))
         sigs_CN <- sigs_CN$solution
       } else {
@@ -209,7 +209,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               cores = cores,
               use_conda = TRUE
             )
-            sigs_SBS <- sigprofiler_import(file.path(result_dir, "SigProfiler_SBS"))
+            sigs_SBS <- sigprofiler_import(file.path(result_dir, "SigProfiler_SBS"), type = if (refit) "refit" else "suggest")
             data.table::fwrite(sigs_SBS$all_stats, file = file.path(result_dir, "results", "SigProfiler_SBS_stats.csv"))
             sigs_SBS <- sigs_SBS$solution
           } else {
@@ -246,7 +246,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               cores = cores,
               use_conda = TRUE
             )
-            sigs_DBS <- sigprofiler_import(file.path(result_dir, "SigProfiler_DBS"))
+            sigs_DBS <- sigprofiler_import(file.path(result_dir, "SigProfiler_DBS"), type = if (refit) "refit" else "suggest")
             data.table::fwrite(sigs_DBS$all_stats, file = file.path(result_dir, "results", "SigProfiler_DBS_stats.csv"))
             sigs_DBS <- sigs_DBS$solution
           } else {
@@ -283,7 +283,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               cores = cores,
               use_conda = TRUE
             )
-            sigs_ID <- sigprofiler_import(file.path(result_dir, "SigProfiler_ID"))
+            sigs_ID <- sigprofiler_import(file.path(result_dir, "SigProfiler_ID"), type = if (refit) "refit" else "suggest")
             data.table::fwrite(sigs_ID$all_stats, file = file.path(result_dir, "results", "SigProfiler_ID_stats.csv"))
             sigs_ID <- sigs_ID$solution
           } else {
@@ -561,9 +561,17 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
       if (!is.null(mat)) {
         mat <- t(mat)
         ## COSMIC V2 SBS
+        if (index == "ALL") {
+          index2 <- "ALL"
+        } else {
+          sigminer:::send_info("Only keep index <= 30 when using legacy signature database.")
+          index2 <- gsub("[A-Za-z]", "", index)
+          index2 <- as.integer(sigminer:::split_seq(index2))
+          index2 <- as.character(index2[index2 <= 30])
+        }
         fit_legacy <- sig_fit(
           catalogue_matrix = mat,
-          sig_index = index,
+          sig_index = index2,
           sig_db = "legacy",
           mode = "SBS",
           return_class = "data.table",
@@ -622,9 +630,17 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
       if (!is.null(mat)) {
         mat <- t(mat)
         ## COSMIC V2 SBS
+        if (index == "ALL") {
+          index2 <- "ALL"
+        } else {
+          sigminer:::send_info("Only keep index <= 30 when using legacy signature database.")
+          index2 <- gsub("[A-Za-z]", "", index)
+          index2 <- as.integer(sigminer:::split_seq(index2))
+          index2 <- as.character(index2[index2 <= 30])
+        }
         bt_legacy <- sig_fit_bootstrap_batch(
           catalogue_matrix = mat,
-          sig_index = index,
+          sig_index = index2,
           sig_db = "legacy",
           mode = "SBS",
           n = nrun,

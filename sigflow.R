@@ -732,18 +732,14 @@ input <- ARGS$input
 genome_build <- ARGS$genome
 result_dir <- path.expand(ARGS$output)
 
-if (!is.null(ARGS$input) | ARGS$verbose) { 
-  if (!dir.exists(result_dir)) {
-    dir.create(result_dir, recursive = TRUE)
-    message("Result directory ", result_dir, " created.")
-  } else {
-    message("Result directory ", result_dir, " existed.")
-  }
+if (!dir.exists(result_dir)) {
+  dir.create(result_dir, recursive = TRUE)
+  if (ARGS$verbose) message("Result directory ", result_dir, " created.")
+} else {
+  if (ARGS$verbose) message("Result directory ", result_dir, " existed.")
 }
 
-
 if (!is.null(input)) {
-  
   if (any(endsWith(input, c("xls", "xlsx")))) {
     if (!suppressMessages(require("readxl"))) {
       message("readxl not found, try installing.")
@@ -752,13 +748,13 @@ if (!is.null(input)) {
     }
     input <- readxl::read_excel(input)
   }
-  
+
   if (mode == "CN") {
     isCN <- TRUE
   } else {
     isCN <- FALSE
   }
-  
+
   if (!isCN) {
     if (!file.exists(file.path(result_dir, "maf_obj.RData"))) {
       if (dir.exists(input)) {
@@ -933,15 +929,61 @@ if (ARGS$extract) {
   )
 } else if (ARGS$show) {
   message("Running Sigflow 'show' subcommand...\n------")
-  
+
   if (!is.null(ARGS$isearch)) {
     message("Searching cancer-type specific indices with keyword: ", ARGS$isearch)
     message("===")
     sigminer::get_sig_cancer_type_index(keyword = ARGS$isearch)
     message("\nFor online search, please go to:\n\thttps://shixiangwang.github.io/sigminer-doc/sigflow.html#cancer-type-specific-signature-index-database")
     message("===")
-  } 
-  
+  } else {
+    if (!mode %in% c("SBS", "DBS", "ID")) {
+      message("Error: valid signature modes to plot are 'SBS', 'DBS' and 'ID'.")
+      quit(save = "no", -1)
+    }
+
+    message("Plotting COSMIC reference signatures...")
+    message("===")
+    index <- ARGS$index
+
+    width <- 12
+    base_h <- 1.5
+    if (!"ALL" %in% index) {
+      index <- sigminer:::split_seq(index)
+      height <- base_h * length(index)
+    }
+
+    if (mode == "SBS") {
+      if ("ALL" %in% index) {
+        index2 <- "ALL"
+        height2 <- 30 * base_h
+      } else {
+        index2 <- as.integer(gsub("[A-Za-z]", "", index))
+        index2 <- as.character(index2[index2 <= 30])
+        height2 <- base_h * length(index2)
+      }
+
+      outpath <- file.path(result_dir, "SBS_signature_profile_cosmic_v2.pdf")
+      message("Outputing to ", outpath)
+
+      p_legacy <- show_cosmic_sig_profile(sig_index = index2, style = "cosmic")
+      ggplot2::ggsave(outpath, plot = p_legacy, width = width, height = height2, limitsize = FALSE)
+    }
+
+    outpath <- file.path(result_dir, paste0(mode, "_signature_profile_cosmic_v3.pdf"))
+    message("Outputing to ", outpath)
+    if ("ALL" %in% index) {
+      height <- switch(mode,
+        SBS = 67 * base_h,
+        DBS = 11 * base_h,
+        ID = 17 * base_h
+      )
+    }
+    p <- show_cosmic_sig_profile(sig_index = index, sig_db = mode, style = "cosmic")
+    ggplot2::ggsave(outpath, plot = p, width = width, height = height, limitsize = FALSE)
+
+    message("Done.")
+  }
 }
 
 # End part ----------------------------------------------------------------

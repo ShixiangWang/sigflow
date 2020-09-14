@@ -92,6 +92,21 @@ else
     t9="succeed in test #9"
 fi
 
+# Show PART
+sigflow show --isearch breast
+if [ $? -ne 0 ]; then
+    t11="failed at testing search cancer type specific indices"
+else
+    t11="succeed in test #11"
+fi
+
+sigflow show --mode SBS --index 1,2,3,7a
+if [ $? -ne 0 ]; then
+    t12="failed at plotting COSMIC reference signatures"
+else
+    t12="succeed in test #12"
+fi
+
 ## Output test results
 echo ===========================================
 echo "             Test Results               "
@@ -105,4 +120,6 @@ echo $t7
 echo $t8
 echo $t9
 echo $t10
+echo $t11
+echo $t12
 echo ===========================================

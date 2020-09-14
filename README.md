@@ -143,7 +143,7 @@ Copyright: AFL@2020 [https://opensource.org/licenses/AFL-3.0]
 Desc:
   There are several subcommands.
   ==
-  extract - extract signatures by either automated or manual way.
+  extract - extract signatures by either automatic or semi-automatic way.
             Of note, when you use manual way, you need to run 2 times, 
             firstly you should set --manual to get signature estimation results,
             and secondly you should set --manual --number N to get N signatures.
@@ -151,11 +151,14 @@ Desc:
   fit     - fit signatures in >=1 samples based on COSMIC reference signatures.
   ==
   bt      - run bootstrap signature fitting analysis in >=1 samples.
+  ==
+  show    - show some useful information or plots. See README for details.
 
 Usage:
   sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--refit] [--hyper] [--verbose]
   sigflow fit --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--verbose]
   sigflow bt  --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
+  sigflow show [--isearch=<keyword>] [--index=<index> --mode=<class>] [--output=<outdir>] [--verbose]
   sigflow (-h | --help)
   sigflow --version
 
@@ -172,9 +175,10 @@ Options:
   -g <genome>, --genome <genome>  genome build, can be hg19, hg38 or mm10, [default: hg19].
   -r <runs>, --nrun <runs>        run times of NMF (extract) or bootstrapping (bt) to get results [default: 30].
   -T <cores>, --cores <cores>     cores to run the program, large dataset will benefit from it [default: 1].
-  --refit                         refit the denovo signatures with quadratic programming or nnls.
+  --refit                         refit the de-novo signatures with quadratic programming or nnls (SigProfiler).
   --hyper                         enable hyper mutation handling in COSMIC signatures (not used by SigProfiler approach).
-  --sigprofiler                   enable auto-extraction by SigProfiler software.
+  --sigprofiler                   enable automatic extraction by SigProfiler software.
+  --isearch <keyword>             search and how cancer type specific reference signature index by keyword, e.g. breast.
   -v, --verbose                   print verbose message.
 
 =================================================================
@@ -405,6 +409,11 @@ Here,
 
 ## Updates
 
+- 2020-09-14:
+  - Add new command `show` to search cancer type specific reference signature indices and plot COSMIC signatures.
+  - Support `--refit` in SigProfiler calling.
+  - Fix a bug in identifying COSMIC v2 indices in signature fitting.
+  - Upgrade sigminer version to v1.0.17.
 - 2020-09-09:
   - Update README and documentation of input and usage.
 - 2020-09-03: 
@@ -413,10 +422,10 @@ Here,
   - Support matrix as input.
 - 2020-08-14: Use sigminer v1.0.11 to use SigProfilerExtractor v1.0.15 to avoid issue raised from SigProfilerExtractor updates.
 - 2020-08-05: **Release Sigflow 1.0** and related Docker image. This version is based on Sigminer v1.0.10, R v4.0.2 and SigProfilerExtractor v.1.0.15.
-  - Supported SigProfiler.
-  - Added `verbose` option.
-  - Added `max` option.
-  - Added `hyper` option.
+  - Support SigProfiler.
+  - Add `verbose` option.
+  - Add `max` option.
+  - Add `hyper` option.
   - More flexible and reasonable configuration.
 - 2020-07-29: **Release Sigflow 0.1** using Docker. Sigflow 0.1 is based on Sigminer v1.0.9 and R v4.0.2
 

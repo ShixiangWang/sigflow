@@ -100,7 +100,7 @@ else
     t11="succeed in test #11"
 fi
 
-sigflow show --mode SBS --index 1,2,3,7a
+sigflow show --mode SBS --index 1,2,3,7a -o test_results/test_show_sig_profile
 if [ $? -ne 0 ]; then
     t12="failed at plotting COSMIC reference signatures"
 else

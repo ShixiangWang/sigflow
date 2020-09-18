@@ -30,6 +30,7 @@ studying signature stability.
       - [`extract` command](#extract-command)
       - [`fit` command](#fit-command)
       - [`bt` command](#bt-command)
+      - [`show` command](#show-command)
       - [How to use Docker to run Sigflow](#how-to-use-docker-to-run-sigflow)
   - [Updates](#updates)
   - [Test](#test)
@@ -344,7 +345,9 @@ Results of `fit` command have the following structure:
 
 #### `bt` command
 
-> The principle of using bootstrapping analysis for estimating signature exposure instability comes from paper [Detecting presence of mutational signatures in cancer with confidence](https://academic.oup.com/bioinformatics/article/34/2/330/4209996).
+Bootstrapping analysis was performed to evaluate the stability of signature exposure. For a tumor, this analysis firstly resamples mutations based on the observed mutation type (component) frequency and then applies signature fitting to the bootstrapping samples. For example, if a tumor harbors 100 mutations and 20 mutations are classified into T[C>T]T, then we resample 100 mutations and the probability to assign these mutation to T[C>T]T is 0.2. If we repeat such process many times, we can estimate the confidence interval of exposure of a signature in this tumor.
+
+> More details please read paper [Detecting presence of mutational signatures in cancer with confidence](https://academic.oup.com/bioinformatics/article/34/2/330/4209996).
 
 ```sh
 $ # Assume you have done the clone step
@@ -389,7 +392,43 @@ Results of `bt` command have the following structure:
 
   > Signature exposure instability is measured as MRSE between exposures in bootstrap samples and exposures in the original samples for each tumor/patient.
 
-  
+
+
+
+#### `show` command
+
+`show` command provides extra information to help user analyze signatures. This includes:
+
+1. Search cancer type specific signature indices, this may help user to set the reference indices in `fit` and `bt` commands. This information could read [online](https://shixiangwang.github.io/sigminer-doc/sigflow.html#cancer-type-specific-signature-index-database).
+2. Generate COSMIC reference signature profiles.
+
+For the no.1 task, one could run
+
+```sh
+$ sigflow show --isearch breast
+```
+
+This will generate the following output:
+
+![image-20200918150257473](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200918150257.png)
+
+For the no.2 task, one could run
+
+```sh
+sigflow show --mode SBS --index 1,2,3,7a -o test_show_sig_profile
+```
+
+This will generate signature profile for signature 1,2,3,7. For SBS, two versions of plots exist.
+
+![image-20200918150649303](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200918150649.png)
+
+COSMIC v2:
+
+![image-20200918150754770](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200918150754.png)
+
+COSMIC v3:
+
+![image-20200918150825289](https://gitee.com/ShixiangWang/ImageCollection/raw/master/png/20200918150825.png)
 
 #### How to use Docker to run Sigflow
 
@@ -411,6 +450,7 @@ Here,
 
 ## Updates
 
+- 2020-09-18: Update doc for `bt` command and add doc for `show` command.
 - 2020-09-15: Release **Sigflow 1.2**
   - Upgrade sigminer version (v1.0.18) to fix bug when outputing results for only one signatures ([#17](https://github.com/ShixiangWang/sigflow/issues/17)).
 - 2020-09-15: Prepare and try to release **Sigflow 1.1**. This is a version with its co-evolutionary R package Sigminer v1.0.17 and gold-standard de-novo signature extraction tool SigProfilerExtractor v1.0.17 as backends.

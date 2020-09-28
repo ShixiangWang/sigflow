@@ -180,6 +180,11 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           cores = cores,
           use_conda = TRUE
         )
+        f <- list.files(file.path(result_dir, "SigProfiler_CN"),
+                        "selection_plot.pdf", all.files = TRUE, full.names = TRUE, recursive = TRUE)
+        if (file.exists(f)) {
+          file.copy(f, to = file.path(result_dir, "results", "SigProfiler_CN_signature_number_selection.pdf"), overwrite = TRUE)
+        }
         sigs_CN <- sigprofiler_import(file.path(result_dir, "SigProfiler_CN"), type = if (refit) "refit" else "suggest")
         data.table::fwrite(sigs_CN$all_stats, file = file.path(result_dir, "results", "SigProfiler_CN_stats.csv"))
         sigs_CN <- sigs_CN$solution
@@ -212,6 +217,11 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               cores = cores,
               use_conda = TRUE
             )
+            f <- list.files(file.path(result_dir, "SigProfiler_SBS"),
+                            "selection_plot.pdf", all.files = TRUE, full.names = TRUE, recursive = TRUE)
+            if (file.exists(f)) {
+              file.copy(f, to = file.path(result_dir, "results", "SigProfiler_SBS_signature_number_selection.pdf"), overwrite = TRUE)
+            }
             sigs_SBS <- sigprofiler_import(file.path(result_dir, "SigProfiler_SBS"), type = if (refit) "refit" else "suggest")
             data.table::fwrite(sigs_SBS$all_stats, file = file.path(result_dir, "results", "SigProfiler_SBS_stats.csv"))
             sigs_SBS <- sigs_SBS$solution
@@ -249,6 +259,11 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               cores = cores,
               use_conda = TRUE
             )
+            f <- list.files(file.path(result_dir, "SigProfiler_DBS"),
+                            "selection_plot.pdf", all.files = TRUE, full.names = TRUE, recursive = TRUE)
+            if (file.exists(f)) {
+              file.copy(f, to = file.path(result_dir, "results", "SigProfiler_DBS_signature_number_selection.pdf"), overwrite = TRUE)
+            }
             sigs_DBS <- sigprofiler_import(file.path(result_dir, "SigProfiler_DBS"), type = if (refit) "refit" else "suggest")
             data.table::fwrite(sigs_DBS$all_stats, file = file.path(result_dir, "results", "SigProfiler_DBS_stats.csv"))
             sigs_DBS <- sigs_DBS$solution
@@ -286,6 +301,11 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               cores = cores,
               use_conda = TRUE
             )
+            f <- list.files(file.path(result_dir, "SigProfiler_ID"),
+                            "selection_plot.pdf", all.files = TRUE, full.names = TRUE, recursive = TRUE)
+            if (file.exists(f)) {
+              file.copy(f, to = file.path(result_dir, "results", "SigProfiler_ID_signature_number_selection.pdf"), overwrite = TRUE)
+            }
             sigs_ID <- sigprofiler_import(file.path(result_dir, "SigProfiler_ID"), type = if (refit) "refit" else "suggest")
             data.table::fwrite(sigs_ID$all_stats, file = file.path(result_dir, "results", "SigProfiler_ID_stats.csv"))
             sigs_ID <- sigs_ID$solution

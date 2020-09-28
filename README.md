@@ -450,6 +450,7 @@ Here,
 
 ## Updates
 
+- 2020-09-28: Copy signature estimation output pdf file from SigProfiler to result directory, **release Sigflow 1.3**.
 - 2020-09-18: Update doc for `bt` command and add doc for `show` command.
 - 2020-09-15: Release **Sigflow 1.2**
   - Upgrade sigminer version (v1.0.18) to fix bug when outputing results for only one signatures ([#17](https://github.com/ShixiangWang/sigflow/issues/17)).

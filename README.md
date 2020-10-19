@@ -451,6 +451,7 @@ Here,
 
 ## Updates
 
+- 2020-10-19: Update citation paper.
 - 2020-09-28: Copy signature estimation output pdf file from SigProfiler to result directory, **release Sigflow 1.3**.
 - 2020-09-18: Update doc for `bt` command and add doc for `show` command.
 - 2020-09-15: Release **Sigflow 1.2**
@@ -490,11 +491,9 @@ It is time consuming to run all tests, just pick an example test similar to your
 
 ## Citation
 
-The **Sigflow** has not been formly published, if you are using **Sigflow** fow now, please cite:
+If you are using **Sigflow** fow now in academic field, please cite:
 
-Sigflow: an automated and comprehensive pipeline for cancer genome mutational signature analysis.
-Shixiang Wang, Ziyu Tao, Tao Wu, Xue-Song Liu.
-bioRxiv 2020.08.12.247528; doi: https://doi.org/10.1101/2020.08.12.247528
+Shixiang Wang, Ziyu Tao, Tao Wu, Xue-Song Liu, Sigflow: An Automated And Comprehensive Pipeline For Cancer Genome Mutational Signature Analysis, Bioinformatics, , btaa895, https://doi.org/10.1093/bioinformatics/btaa895
 
 ## License
 

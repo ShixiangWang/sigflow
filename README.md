@@ -493,7 +493,7 @@ It is time consuming to run all tests, just pick an example test similar to your
 
 If you are using **Sigflow** fow now in academic field, please cite:
 
-Shixiang Wang, Ziyu Tao, Tao Wu, Xue-Song Liu, Sigflow: An Automated And Comprehensive Pipeline For Cancer Genome Mutational Signature Analysis, Bioinformatics, , btaa895, https://doi.org/10.1093/bioinformatics/btaa895
+Shixiang Wang, Ziyu Tao, Tao Wu, Xue-Song Liu, Sigflow: An Automated And Comprehensive Pipeline For Cancer Genome Mutational Signature Analysis, Bioinformatics, btaa895, https://doi.org/10.1093/bioinformatics/btaa895
 
 ## License
 

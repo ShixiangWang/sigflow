@@ -115,7 +115,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
   if (genome_build == "hg19") {
     ref_genome <- "BSgenome.Hsapiens.UCSC.hg19"
   } else if (genome_build == "hg38") {
-    ref_genome <- "BSgenome.Hsapiens.UCSC.hg19"
+    ref_genome <- "BSgenome.Hsapiens.UCSC.hg38"
   } else if (genome_build == "mm10") {
     ref_genome <- "BSgenome.Mmusculus.UCSC.mm10"
   }

@@ -3,3 +3,6 @@ README.md
 sigflow.Rproj
 docker_build.sh
 test/test_docker.sh
+docs/
+site/
+mkdocs.yml

@@ -10,7 +10,7 @@ Desc:
   There are several subcommands.
   ==
   extract - extract signatures by either automatic or semi-automatic way.
-            Of note, when you use manual way, you need to run 2 times, 
+            Of note, when you use manual way, you need to run 2 times,
             firstly you should set --manual to get signature estimation results,
             and secondly you should set --manual --number N to get N signatures.
   ==
@@ -65,12 +65,12 @@ if (!exists("arguments")) {
 message("
 =================================================================
 
-       .__        _____.__                 
+       .__        _____.__
   _____|__| _____/ ____\\  |   ______  _  __
  /  ___/  |/ ___\\   __\\|  |  /  _ \\ \\/ \\/ /
- \\___ \\|  / /_/  >  |  |  |_(  <_> )     / 
-/____  >__\\___  /|__|  |____/\\____/ \\/\\_/  
-     \\/  /_____/                           
+ \\___ \\|  / /_/  >  |  |  |_(  <_> )     /
+/____  >__\\___  /|__|  |____/\\____/ \\/\\_/
+     \\/  /_____/
 
 Name   :       sigflow
 Author :       Shixiang Wang
@@ -341,7 +341,6 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           nrun = nrun,
           range = 2:min(30, max_number),
           cores = cores,
-          pConstant = 1e-9,
           save_plots = TRUE,
           plot_basename = file.path(result_dir, "manual_extraction", "CN_sig_number"),
           verbose = TRUE
@@ -363,7 +362,6 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               nrun = nrun,
               range = 2:min(30, max_number),
               cores = cores,
-              pConstant = 1e-9,
               save_plots = TRUE,
               plot_basename = file.path(result_dir, "manual_extraction", "SBS_sig_number"),
               verbose = TRUE
@@ -386,7 +384,6 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               nrun = nrun,
               range = 2:min(15, max_number),
               cores = cores,
-              pConstant = 1e-9,
               save_plots = TRUE,
               plot_basename = file.path(result_dir, "manual_extraction", "DBS_sig_number"),
               verbose = TRUE
@@ -409,7 +406,6 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               nrun = nrun,
               range = 2:min(20, max_number),
               cores = cores,
-              pConstant = 1e-9,
               save_plots = TRUE,
               plot_basename = file.path(result_dir, "manual_extraction", "ID_sig_number"),
               verbose = TRUE
@@ -444,8 +440,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
           n_sig = manual_step,
           nrun = nrun,
           cores = cores,
-          optimize = refit,
-          pConstant = 1e-9
+          optimize = refit
         )
       } else {
         load(file = file.path(result_dir, "maf_tally.RData"))
@@ -468,8 +463,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               n_sig = manual_step,
               nrun = nrun,
               cores = cores,
-              optimize = refit,
-              pConstant = 1e-9
+              optimize = refit
             )
           }
         }
@@ -485,8 +479,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               n_sig = manual_step,
               nrun = nrun,
               cores = cores,
-              optimize = refit,
-              pConstant = 1e-9
+              optimize = refit
             )
           }
         }
@@ -502,8 +495,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
               n_sig = manual_step,
               nrun = nrun,
               cores = cores,
-              optimize = refit,
-              pConstant = 1e-9
+              optimize = refit
             )
           }
         }

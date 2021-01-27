@@ -21,7 +21,7 @@ RUN R -e "BiocManager::install('BSgenome')" && \
     R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')" && \
     R -e "BiocManager::install('BSgenome.Mmusculus.UCSC.mm10')"
 ## Install sigminer & SigProfiler & test SigProfiler
-RUN R -e "BiocManager::install('ShixiangWang/sigminer@v1.0.18', dependencies = TRUE)" && \
+RUN R -e "BiocManager::install('ShixiangWang/sigminer@v1.2.1', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/* && \
     R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_M.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_M[['nmf_matrix']]; print(mat); sigprofiler_extract(mat, '/opt/test_sp_install', range = 3:4, nrun = 2L, use_conda = TRUE); cat(paste(list.files('/opt/test_sp_install', recursive = TRUE), '\n')); sigprofiler_import('/opt/test_sp_install')" && \
     rm -rf /opt/test_sp_install && \
@@ -37,7 +37,7 @@ RUN R --vanilla -f /opt/pkg_check.R && \
     cd /opt/test && chmod u+x test.sh && ./test.sh && rm -rf test_results && cd /root
 WORKDIR /root
 ## Deploy
-## When ENTRYPOINT is used, the docker can be only run as a command 
+## When ENTRYPOINT is used, the docker can be only run as a command
 ## unless specify --entrypoint /bin/bash to access docker terminal
 ## see: https://phoenixnap.com/kb/docker-run-override-entrypoint
 ## sudo docker run -it --rm --entrypoint bash shixiangwang/sigflow

@@ -78,7 +78,7 @@ $ git clone https://github.com/ShixiangWang/sigflow
 
 ```bash
 $ cd sigflow
-$ ln -s $PWD/sigflow.R /usr/bin/sigflow  # You can choose another place instead of /usr/bin/sigflow
+$ ln -s $PWD/sigflow.R /usr/local/bin/sigflow  # You can choose another place instead of /usr/bin/sigflow
 ```
 
 5. Try calling `sigflow`

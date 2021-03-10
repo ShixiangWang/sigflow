@@ -97,6 +97,8 @@ if (!is.null(ARGS$input) | ARGS$verbose) {
   message("------\n")
 }
 
+message("User command calling: ", paste(commandArgs(), collapse = " "))
+message("------\n")
 # Function part -----------------------------------------------------------
 ## Program to go
 
@@ -145,13 +147,13 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
       }
       save(tally_list, file = file.path(result_dir, "maf_tally.RData"))
       if (!is.null(tally_list$SBS_96) & mode %in% c("SBS", "ALL")) {
-        output_tally(tally_list$SBS_96 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
+        output_tally(tally_list$SBS_96[rowSums(tally_list$SBS_96) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
       }
       if (!is.null(tally_list$DBS_78) & mode %in% c("DBS", "ALL")) {
-        output_tally(tally_list$DBS_78 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
+        output_tally(tally_list$DBS_78[rowSums(tally_list$DBS_78) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
       }
       if (!is.null(tally_list$ID_83) & mode %in% c("ID", "ALL")) {
-        output_tally(tally_list$ID_83 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
+        output_tally(tally_list$ID_83[rowSums(tally_list$ID_83) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
       }
     }
   } else {
@@ -525,7 +527,6 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
                          index = "ALL",
                          prog = c("fit", "bootstrap")) {
   prog <- match.arg(prog)
-
   if (!dir.exists(file.path(result_dir, "results"))) {
     dir.create(file.path(result_dir, "results"), recursive = TRUE)
   }
@@ -554,13 +555,14 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
     tally_list <- sig_tally(obj, mode = "ALL", ref_genome = ref_genome)
     save(tally_list, file = file.path(result_dir, "maf_tally.RData"))
     if (!is.null(tally_list$SBS_96) & mode %in% c("SBS", "ALL")) {
-      output_tally(tally_list$SBS_96 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
+      output_tally(tally_list$SBS_96[rowSums(tally_list$SBS_96) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
     }
+    print("hello0")
     if (!is.null(tally_list$DBS_78) & mode %in% c("DBS", "ALL")) {
-      output_tally(tally_list$DBS_78 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
+      output_tally(tally_list$DBS_78[rowSums(tally_list$DBS_78) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
     }
     if (!is.null(tally_list$ID_83) & mode %in% c("ID", "ALL")) {
-      output_tally(tally_list$ID_83 %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
+      output_tally(tally_list$ID_83[rowSums(tally_list$ID_83) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
     }
   } else {
     stop("Fitting reference signatures for CN is not supported for now!")
@@ -593,7 +595,6 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
           return_error = TRUE
         )
         output_fit(fit_legacy, result_dir = file.path(result_dir, "results"), mut_type = "legacy")
-
         fit_SBS <- sig_fit(
           catalogue_matrix = mat,
           sig_index = index,

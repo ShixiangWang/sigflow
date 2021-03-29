@@ -452,6 +452,9 @@ Here,
 
 ## Updates
 
+- 2021-03-29: 
+  - enhanced data check.
+  - upgraded sigminer to v1.9 (the alpha version for sigminer v2).
 - 2020-12-01: Another typo for hg38 reference genome build, thanks to @PalashPandey.
 - 2020-11-30: Fix a typo which incorrectly assign the reference genome, thanks to @PalashPandey.
 - 2020-10-19: Update citation paper.

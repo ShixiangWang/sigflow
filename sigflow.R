@@ -55,7 +55,7 @@ if (!suppressMessages(require("docopt"))) {
 }
 
 library("docopt")
-arguments <- docopt(doc, version = "sigflow v1.6\n")
+arguments <- docopt(doc, version = "sigflow v2.0\n")
 
 ## Stop error parsing
 if (!exists("arguments")) {
@@ -74,7 +74,7 @@ message("
 
 Name   :       sigflow
 Author :       Shixiang Wang
-Version:       1.6
+Version:       2.0
 License:       AFL 3.0
 Link   :       https://github.com/ShixiangWang/sigflow
 Doc    :       https://github.com/ShixiangWang/sigflow
@@ -114,13 +114,11 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
   sigminer:::send_info("Pipeline for extraction started.")
   on.exit(sigminer:::send_elapsed_time(timer))
 
-  if (genome_build == "hg19") {
-    ref_genome <- "BSgenome.Hsapiens.UCSC.hg19"
-  } else if (genome_build == "hg38") {
-    ref_genome <- "BSgenome.Hsapiens.UCSC.hg38"
-  } else if (genome_build == "mm10") {
-    ref_genome <- "BSgenome.Mmusculus.UCSC.mm10"
-  }
+  ref_genome <- switch(
+    genome_build, 
+    hg19 = "BSgenome.Hsapiens.UCSC.hg19", 
+    hg38 = "BSgenome.Hsapiens.UCSC.hg38",
+    mm10 = "BSgenome.Mmusculus.UCSC.mm10")
 
   if (!suppressMessages(require(ref_genome, character.only = TRUE))) {
     sigminer:::send_info("Package ", ref_genome, " not found, try installing.")
@@ -535,13 +533,11 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
   sigminer:::send_info("Pipeline for (bootstrap) fitting started.")
   on.exit(sigminer:::send_elapsed_time(timer))
 
-  if (genome_build == "hg19") {
-    ref_genome <- "BSgenome.Hsapiens.UCSC.hg19"
-  } else if (genome_build == "hg38") {
-    ref_genome <- "BSgenome.Hsapiens.UCSC.hg38"
-  } else if (genome_build == "mm10") {
-    ref_genome <- "BSgenome.Mmusculus.UCSC.mm10"
-  }
+  ref_genome <- switch(
+    genome_build, 
+    hg19 = "BSgenome.Hsapiens.UCSC.hg19", 
+    hg38 = "BSgenome.Hsapiens.UCSC.hg38",
+    mm10 = "BSgenome.Mmusculus.UCSC.mm10")
 
   if (!suppressMessages(require(ref_genome, character.only = TRUE))) {
     sigminer:::send_info("Package ", ref_genome, " not found, try installing.")
@@ -947,7 +943,7 @@ if (ARGS$extract) {
     message("Searching cancer-type specific indices with keyword: ", ARGS$isearch)
     message("===")
     sigminer::get_sig_cancer_type_index(keyword = ARGS$isearch)
-    message("\nFor online search, please go to:\n\thttps://shixiangwang.github.io/sigminer-doc/sigflow.html#cancer-type-specific-signature-index-database")
+    #message("\nFor online search, please go to:\n\thttps://shixiangwang.github.io/sigminer-doc/sigflow.html#cancer-type-specific-signature-index-database")
     message("===")
   } else {
     if (!mode %in% c("SBS", "DBS", "ID")) {

@@ -15,7 +15,7 @@ if (length(missing_pkgs) > 0) {
   message("Try installing them...")
 
   if ("sigminer" %in% missing_pkgs) {
-    BiocManager::install("ShixiangWang/sigminer@v1.9", dependencies = TRUE)
+    BiocManager::install("ShixiangWang/sigminer@v2.0.2", dependencies = TRUE)
   }
 
   rem_pkgs <- setdiff(missing_pkgs, "sigminer")

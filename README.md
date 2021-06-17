@@ -109,6 +109,7 @@ Current available tag versions:
 - <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.3?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/1.3"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.3">
 - <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.5?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/1.5"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.5">
 - <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/2.0?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/2.0"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/2.0">
+- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/2.1?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/2.1"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/2.1">
 
 Use latest version:
 
@@ -453,6 +454,7 @@ Here,
 
 ## Updates
 
+- 2021-06-17: upgraded sigminer to v2.0.2 to fix [issue #31](https://github.com/ShixiangWang/sigflow/issues/31).
 - 2021-04-02: upgraded sigminer to v2.0.
 - 2021-03-29: 
   - enhanced data check.

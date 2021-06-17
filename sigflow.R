@@ -55,7 +55,7 @@ if (!suppressMessages(require("docopt"))) {
 }
 
 library("docopt")
-arguments <- docopt(doc, version = "sigflow v2.0\n")
+arguments <- docopt(doc, version = "sigflow v2.1\n")
 
 ## Stop error parsing
 if (!exists("arguments")) {
@@ -74,7 +74,7 @@ message("
 
 Name   :       sigflow
 Author :       Shixiang Wang
-Version:       2.0
+Version:       2.1
 License:       AFL 3.0
 Link   :       https://github.com/ShixiangWang/sigflow
 Doc    :       https://github.com/ShixiangWang/sigflow

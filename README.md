@@ -102,14 +102,14 @@ $ docker pull shixiangwang/sigflow:1.0
 
 Current available tag versions:
 
-- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/0.1?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/0.1"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/0.1">
-- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.0?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/1.0"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.0">
-- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.1?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/1.1"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.1">
-- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.2?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/1.2"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.2">
-- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.3?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/1.3"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.3">
-- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.5?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/1.5"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.5">
-- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/2.0?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/2.0"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/2.0">
-- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/2.1?color=blue"> <img alt="MicroBadger Layers (tag)" src="https://img.shields.io/microbadger/layers/shixiangwang/sigflow/2.1"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/2.1">
+- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/0.1?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/0.1">
+- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.0?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.0">
+- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.1?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.1">
+- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.2?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.2">
+- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.3?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.3">
+- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.5?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.5">
+- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/2.0?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/2.0">
+- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/2.1?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/2.1">
 
 Use latest version:
 
@@ -454,6 +454,7 @@ Here,
 
 ## Updates
 
+- 2022-02-13: add troubleshooting section.
 - 2021-06-17: upgraded sigminer to v2.0.2 to fix [issue #31](https://github.com/ShixiangWang/sigflow/issues/31).
 - 2021-04-02: upgraded sigminer to v2.0.
 - 2021-03-29: 
@@ -493,6 +494,13 @@ Here,
 
 There are some example data sets in this repository, you can find how to test different workflows in [test/test.sh](test/test.sh).
 It is time consuming to run all tests, just pick an example test similar to your task and see how it works. Before releasing a new version of **Sigflow**, I would run all tests to make sure they work well.
+
+## Troubleshooting
+
+1. Error like `the supplied end is > refwidth`. ([[#32](https://github.com/ShixiangWang/sigflow/issues/32)])
+
+The reference genome for variant calling is not (perfectly) match the specified genome in `sig_tally()`. If you make sure the reference genome is correct, please try finding the variant records with uncompatible position and removing them before rerun.
+
 
 ## Other tools
 

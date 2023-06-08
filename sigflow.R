@@ -74,7 +74,7 @@ message("
 
 Name   :       sigflow
 Author :       Shixiang Wang
-Version:       2.1
+Version:       2.2
 License:       AFL 3.0
 Link   :       https://github.com/ShixiangWang/sigflow
 Doc    :       https://github.com/ShixiangWang/sigflow
@@ -522,7 +522,7 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
 
 
 flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
-                         index = "ALL",
+                         index = "ALL", cores = 1,
                          prog = c("fit", "bootstrap")) {
   prog <- match.arg(prog)
   if (!dir.exists(file.path(result_dir, "results"))) {
@@ -657,7 +657,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
           mode = "SBS",
           n = nrun,
           p_val_thresholds = c(0.01, 0.05, 0.10, 0.25),
-          use_parallel = TRUE,
+          use_parallel = cores,
           job_id = "legacy",
           result_dir = file.path(result_dir, "bootstrap"),
         )
@@ -671,7 +671,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
           mode = "SBS",
           n = nrun,
           p_val_thresholds = c(0.01, 0.05, 0.10, 0.25),
-          use_parallel = TRUE,
+          use_parallel = cores,
           job_id = "SBS",
           result_dir = file.path(result_dir, "bootstrap"),
         )
@@ -691,7 +691,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
           mode = "DBS",
           n = nrun,
           p_val_thresholds = c(0.01, 0.05, 0.10, 0.25),
-          use_parallel = TRUE,
+          use_parallel = cores,
           job_id = "DBS",
           result_dir = file.path(result_dir, "bootstrap"),
         )
@@ -711,7 +711,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
           mode = "ID",
           n = nrun,
           p_val_thresholds = c(0.01, 0.05, 0.10, 0.25),
-          use_parallel = TRUE,
+          use_parallel = cores,
           job_id = "ID",
           result_dir = file.path(result_dir, "bootstrap"),
         )
@@ -918,13 +918,13 @@ if (ARGS$extract) {
     {
       if (ARGS$verbose) {
         flow_fitting(
-          obj = obj, genome_build = genome_build, mode = ARGS$mode,
+          obj = obj, genome_build = genome_build, mode = ARGS$mode,  cores = cores,
           result_dir = result_dir, nrun = nrun, index = ARGS$index, prog = "bootstrap"
         )
       } else {
         suppressMessages(
           flow_fitting(
-            obj = obj, genome_build = genome_build, mode = ARGS$mode,
+            obj = obj, genome_build = genome_build, mode = ARGS$mode, cores = cores,
             result_dir = result_dir, nrun = nrun, index = ARGS$index, prog = "bootstrap"
           )
         )

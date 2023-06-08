@@ -110,6 +110,7 @@ Current available tag versions:
 - <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/1.5?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/1.5">
 - <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/2.0?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/2.0">
 - <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/2.1?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/2.1">
+- <img alt="Docker Image Version" src="https://img.shields.io/docker/v/shixiangwang/sigflow/2.2?color=blue"> <img alt="Docker Image Size (tag)" src="https://img.shields.io/docker/image-size/shixiangwang/sigflow/2.2">
 
 Use latest version:
 
@@ -454,6 +455,7 @@ Here,
 
 ## Updates
 
+- 2023-06-08: add thread controls in boostrap fit instead of using all available cores as workers.
 - 2022-02-13: add troubleshooting section.
 - 2021-06-17: upgraded sigminer to v2.0.2 to fix [issue #31](https://github.com/ShixiangWang/sigflow/issues/31).
 - 2021-04-02: upgraded sigminer to v2.0.

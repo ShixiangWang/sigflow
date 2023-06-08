@@ -23,7 +23,7 @@ Desc:
 Usage:
   sigflow extract --input=<file> [--output=<outdir>] [--mode=<class>] [--manual --number <sigs>] [--max <max>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--sigprofiler] [--refit] [--hyper] [--verbose]
   sigflow fit --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--verbose]
-  sigflow bt  --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--verbose]
+  sigflow bt  --input=<file> [--output=<outdir>] [--index=<index>] [--mode=<class>] [--genome=<genome>] [--nrun=<runs>] [--cores=<cores>] [--verbose]
   sigflow show [--isearch=<keyword>] [--index=<index> --mode=<class>] [--output=<outdir>] [--verbose]
   sigflow (-h | --help)
   sigflow --version
@@ -553,7 +553,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
     if (!is.null(tally_list$SBS_96) & mode %in% c("SBS", "ALL")) {
       output_tally(tally_list$SBS_96[rowSums(tally_list$SBS_96) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
     }
-    print("hello0")
+
     if (!is.null(tally_list$DBS_78) & mode %in% c("DBS", "ALL")) {
       output_tally(tally_list$DBS_78[rowSums(tally_list$DBS_78) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
     }
@@ -636,6 +636,7 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
     }
   } else {
     ## bootstrap fitting
+    sigminer:::send_info("Set bootstrap fitting with cores: ", cores)
     if (mode == "ALL" | mode == "SBS") {
       mat <- tally_list$SBS_96
 
@@ -914,11 +915,12 @@ if (ARGS$extract) {
 } else if (ARGS$bt) {
   message("Running signature bootstrap fitting pipeline...\n------")
   nrun <- as.integer(ARGS$nrun)
+  cores <- min(as.integer(ARGS$cores), parallel::detectCores())
   tryCatch(
     {
       if (ARGS$verbose) {
         flow_fitting(
-          obj = obj, genome_build = genome_build, mode = ARGS$mode,  cores = cores,
+          obj = obj, genome_build = genome_build, mode = ARGS$mode, cores = cores,
           result_dir = result_dir, nrun = nrun, index = ARGS$index, prog = "bootstrap"
         )
       } else {

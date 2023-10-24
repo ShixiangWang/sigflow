@@ -10,7 +10,7 @@ LABEL \
     org.label-schema.vendor="XSLiu Lab Project"
 
 ## Install system dependencies
-RUN apt update -y && apt install -y libcurl4-openssl-dev libxml2-dev libssl-dev &&  \
+RUN apt update -y && apt install -y libcurl4-openssl-dev libxml2-dev libssl-dev cmake build-essential &&  \
     apt autoremove -y && apt clean -y && apt purge -y && rm -rf /tmp/* /var/tmp/*
 ## Install R packages which are easy to install
 RUN R -e "install.packages('BiocManager', repos = 'https://cloud.r-project.org')" && \

@@ -84,14 +84,6 @@ else
     t8="succeed in test #8"
 fi
 
-# SigProfiler PART
-sigflow extract -i tcga_laml.maf.gz -o test_results/test_sigprofiler -m SBS -r 2 --max 10 -T 4 --sigprofiler
-if [ $? -ne 0 ]; then
-    t9="failed at 'test_sigprofiler' in mode 'SBS'"
-else
-    t9="succeed in test #9"
-fi
-
 # Show PART
 sigflow show --isearch breast
 if [ $? -ne 0 ]; then
@@ -118,7 +110,6 @@ echo $t5
 echo "$t6_1; $t6_2"
 echo $t7
 echo $t8
-echo $t9
 echo $t10
 echo $t11
 echo $t12

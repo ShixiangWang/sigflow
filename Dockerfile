@@ -23,7 +23,7 @@ RUN R -e "BiocManager::install('BSgenome')" && \
 ## Install sigminer & SigProfiler & test SigProfiler
 RUN R -e "BiocManager::install('ShixiangWang/sigminer@v2.2.2', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/* && \
-    R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_M.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_M[['nmf_matrix']]; print(mat); sigprofiler_extract(mat, '/opt/test_sp_install', range = 3:4, nrun = 2L, use_conda = TRUE); cat(paste(list.files('/opt/test_sp_install', recursive = TRUE), '\n')); sigprofiler_import('/opt/test_sp_install')" && \
+    R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_W.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_W[['nmf_matrix']]; print(mat); sigprofiler_extract(mat, '/opt/test_sp_install', range = 3:4, nrun = 2L, use_conda = TRUE); cat(paste(list.files('/opt/test_sp_install', recursive = TRUE), '\n')); sigprofiler_import('/opt/test_sp_install')" && \
     rm -rf /opt/test_sp_install && \
     /root/.local/share/r-miniconda/bin/conda clean -afy
 ## Copy sigflow program and run test

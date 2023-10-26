@@ -23,8 +23,7 @@ RUN R -e "BiocManager::install('BSgenome')" && \
 ## Install sigminer
 RUN R -e "BiocManager::install('ShixiangWang/sigminer@v2.2.2', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/* && \
-    R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_W.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_W[['nmf_matrix']]; print(mat);" && \
-    /root/.local/share/r-miniconda/bin/conda clean -afy
+    R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_W.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_W[['nmf_matrix']]; print(mat);"
 ## Copy sigflow program and run test
 ## It is strange that the docopt cannot be installed to the first location
 ENV PATH /root/.local/share/r-miniconda/bin:$PATH

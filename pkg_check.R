@@ -36,3 +36,12 @@ if (length(missing_pkgs) > 0) {
 }
 
 quit(save = "no", status = ifelse(length(missing_pkgs) == 0, 0, -1), runLast = FALSE)
+
+
+data_type = c("chr_size", "centro_loc", "cytobands", "transcript", "gene")
+
+for (i in data_type) {
+  sigminer::get_genome_annotation(data_type = i, genome_build = "hg19")
+  sigminer::get_genome_annotation(data_type = i, genome_build = "hg38")
+  sigminer::get_genome_annotation(data_type = i, genome_build = "mm10")
+}

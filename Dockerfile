@@ -29,7 +29,8 @@ RUN R -e "BiocManager::install('ShixiangWang/sigminer@v2.2.2', dependencies = TR
 ENV PATH /root/.local/share/r-miniconda/bin:$PATH
 COPY sigflow.R pkg_check.R /opt/
 COPY ./test/ /opt/test/
-RUN R --vanilla -f /opt/pkg_check.R && \
+RUN chmod -R a+w /usr/local/lib/R/site-library && \
+    R --vanilla -f /opt/pkg_check.R && \
     R -e "install.packages('docopt', lib = .libPaths()[2])" && \
     chmod u+x /opt/sigflow.R && ln -s /opt/sigflow.R /usr/bin/sigflow && \
     cd /opt/test && chmod u+x test.sh && ./test.sh && rm -rf test_results && cd /root

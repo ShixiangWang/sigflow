@@ -21,7 +21,7 @@ RUN R -e "BiocManager::install('BSgenome')" && \
     R -e "BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')" && \
     R -e "BiocManager::install('BSgenome.Mmusculus.UCSC.mm10')"
 ## Install sigminer
-RUN R -e "BiocManager::install('ShixiangWang/sigminer@v2.2.2', dependencies = TRUE)" && \
+RUN R -e "BiocManager::install('ShixiangWang/sigminer@v2.3.0', dependencies = TRUE)" && \
     rm -rf /tmp/* /var/tmp/* && \
     R -e "library('sigminer'); load(system.file('extdata', 'toy_copynumber_tally_W.RData', package = 'sigminer', mustWork = TRUE)); mat = cn_tally_W[['nmf_matrix']]; print(mat);"
 ## Copy sigflow program and run test

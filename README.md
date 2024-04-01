@@ -455,6 +455,7 @@ Here,
 
 ## Updates
 
+- 2024-04-01: upgraded sigminer to v2.3.
 - 2023-06-08: add thread controls in boostrap fit instead of using all available cores as workers.
 - 2022-02-13: add troubleshooting section.
 - 2021-06-17: upgraded sigminer to v2.0.2 to fix [issue #31](https://github.com/ShixiangWang/sigflow/issues/31).

@@ -145,13 +145,13 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
       }
       save(tally_list, file = file.path(result_dir, "maf_tally.RData"))
       if (!is.null(tally_list$SBS_96) & mode %in% c("SBS", "ALL")) {
-        output_tally(tally_list$SBS_96[rowSums(tally_list$SBS_96) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
+        output_tally(tally_list$SBS_96[rowSums(tally_list$SBS_96) > 0, , drop = FALSE] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
       }
       if (!is.null(tally_list$DBS_78) & mode %in% c("DBS", "ALL")) {
-        output_tally(tally_list$DBS_78[rowSums(tally_list$DBS_78) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
+        output_tally(tally_list$DBS_78[rowSums(tally_list$DBS_78) > 0, , drop = FALSE] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
       }
       if (!is.null(tally_list$ID_83) & mode %in% c("ID", "ALL")) {
-        output_tally(tally_list$ID_83[rowSums(tally_list$ID_83) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
+        output_tally(tally_list$ID_83[rowSums(tally_list$ID_83) > 0, , drop = FALSE] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
       }
     }
   } else {
@@ -165,6 +165,11 @@ flow_extraction <- function(obj, genome_build, mode, manual_step, nrun, cores, r
       save(tally_list, file = file.path(result_dir, "cn_tally.RData"))
       output_tally(tally_list, result_dir = file.path(result_dir, "results"), mut_type = "CN")
     }
+  }
+  
+  if (min(dim(tally_list[[1]])) < 2) {
+    sigminer:::send_error("`extract` command is not designed for data from one sample! Please switch to `fit` command")
+    stop("normally quit")
   }
 
   if (manual_step < 0) {
@@ -551,14 +556,14 @@ flow_fitting <- function(obj, genome_build, mode, result_dir, nrun = NULL,
     tally_list <- sig_tally(obj, mode = "ALL", ref_genome = ref_genome)
     save(tally_list, file = file.path(result_dir, "maf_tally.RData"))
     if (!is.null(tally_list$SBS_96) & mode %in% c("SBS", "ALL")) {
-      output_tally(tally_list$SBS_96[rowSums(tally_list$SBS_96) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
+      output_tally(tally_list$SBS_96[rowSums(tally_list$SBS_96) > 0, , drop = FALSE] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "SBS")
     }
 
     if (!is.null(tally_list$DBS_78) & mode %in% c("DBS", "ALL")) {
-      output_tally(tally_list$DBS_78[rowSums(tally_list$DBS_78) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
+      output_tally(tally_list$DBS_78[rowSums(tally_list$DBS_78) > 0, , drop = FALSE] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "DBS")
     }
     if (!is.null(tally_list$ID_83) & mode %in% c("ID", "ALL")) {
-      output_tally(tally_list$ID_83[rowSums(tally_list$ID_83) > 0, ] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
+      output_tally(tally_list$ID_83[rowSums(tally_list$ID_83) > 0, , drop = FALSE] %>% t(), result_dir = file.path(result_dir, "results"), mut_type = "ID")
     }
   } else {
     stop("Fitting reference signatures for CN is not supported for now!")
